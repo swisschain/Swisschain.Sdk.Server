@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29609.76
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Swisschain.Sdk.Server", "src\Swisschain.Sdk.Server\Swisschain.Sdk.Server.csproj", "{AECBCC7B-5EC6-4E12-9360-3745816EAB5E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AECBCC7B-5EC6-4E12-9360-3745816EAB5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AECBCC7B-5EC6-4E12-9360-3745816EAB5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AECBCC7B-5EC6-4E12-9360-3745816EAB5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AECBCC7B-5EC6-4E12-9360-3745816EAB5E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {54F3B36D-AC92-43DD-B720-9DDF4D9941ED}
+	EndGlobalSection
+EndGlobal
