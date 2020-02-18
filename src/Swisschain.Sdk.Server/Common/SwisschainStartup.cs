@@ -63,11 +63,11 @@ namespace Swisschain.Sdk.Server.Common
                 RegisterEndpoints(endpoints);
             });
 
-            app.UseSwagger();
-
+            app.UseSwagger(c => c.RouteTemplate = "api/{documentName}/swagger.json");
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "API V1");
+                c.SwaggerEndpoint("../../api/v1/swagger.json", "API V1");
+                c.RoutePrefix = "swagger/ui";
             });
 
             ConfigureExt(app, env);
