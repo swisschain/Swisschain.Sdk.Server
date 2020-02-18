@@ -29,6 +29,8 @@ namespace Swisschain.Sdk.Server.Common
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory())
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
+                    config.Sources.Clear();
+
                     if (optionsBuilder.WebJsonConfigurationSourceBuilder != null)
                     {
                         config.AddWebJsonConfiguration(optionsBuilder.WebJsonConfigurationSourceBuilder);
