@@ -35,10 +35,9 @@ namespace Swisschain.Sdk.Server.Common
                     // TODO: AddAzureBlobConfiguration()
                     // TODO: AddSecretsManagerConfiguration
 
-                    config.AddJsonFile("appsettings.json", optional: true)
-                        .AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: true)
-                        .AddEnvironmentVariables()
-                        .AddUserSecrets(Assembly.GetEntryAssembly());
+                    config.AddJsonFile("appsettings.json", optional: true);
+                    config.AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: true);
+                    config.AddEnvironmentVariables();
                 })
                 .ConfigureServices(services =>
                 {
