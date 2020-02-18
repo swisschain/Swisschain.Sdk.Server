@@ -7,21 +7,30 @@ namespace Swisschain.Sdk.Server.Loggin
 {
     public static class LogConfigurator
     {
-        public static ILoggerFactory Configure(string projectName, string seqUrl)
+        public static ILoggerFactory Configure(string projectName = default, string seqUrl = default)
         {
-            Log.Logger = new LoggerConfiguration()
+            var config = new LoggerConfiguration()
                 .Enrich.FromLogContext()
                 .Enrich.WithExceptionData()
                 .Enrich.WithCorrelationIdHeader()
-                .Enrich.WithProperty("project-name", projectName)
                 .Enrich.WithProperty("app-name", ApplicationInformation.AppName)
                 .Enrich.WithProperty("app-version", ApplicationInformation.AppVersion)
                 .Enrich.WithProperty("host-name", ApplicationEnvironment.HostName)
                 .Enrich.WithProperty("environment", ApplicationEnvironment.Environment)
                 .Enrich.WithProperty("started-at", ApplicationInformation.StartedAt)
-                .WriteTo.Console()
-                .WriteTo.Seq(seqUrl, period: TimeSpan.FromSeconds(1))
-                .CreateLogger();
+                .WriteTo.Console();
+
+            if (projectName != default)
+            {
+                config.Enrich.WithProperty("project-name", projectName);
+            }
+
+            if (seqUrl != default)
+            {
+                config.WriteTo.Seq(seqUrl, period: TimeSpan.FromSeconds(1));
+            }
+                
+            Log.Logger = config.CreateLogger();
 
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             {
