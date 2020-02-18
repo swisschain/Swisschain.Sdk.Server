@@ -1,8 +1,9 @@
 using System;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Swisschain.Sdk.Server.Common;
 
-namespace Swisschain.Sdk.Server.Common
+namespace Swisschain.Sdk.Server.Loggin
 {
     public static class LogConfigurator
     {

@@ -9,7 +9,8 @@ using Microsoft.OpenApi.Models;
 
 namespace Swisschain.Sdk.Server.Common
 {
-    public class SwisschainStartup
+    public class SwisschainStartup<TAppSettings>
+        where TAppSettings : class
     {
         public SwisschainStartup(IConfiguration configuration)
         {
@@ -34,6 +35,8 @@ namespace Swisschain.Sdk.Server.Common
                 builder.AllowAnyMethod();
                 builder.AllowAnyOrigin();
             }));
+
+            services.AddSingleton(Configuration.Get<TAppSettings>());
 
             ConfigureServicesExt(services);
         }
