@@ -12,12 +12,15 @@ namespace Swisschain.Sdk.Server.Common
     public class SwisschainStartup<TAppSettings>
         where TAppSettings : class
     {
-        public SwisschainStartup(IConfiguration configuration)
+        public SwisschainStartup(IConfiguration configRoot)
         {
-            Configuration = configuration;
+            ConfigRoot = configRoot;
+            Config = ConfigRoot.Get<TAppSettings>();
         }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration ConfigRoot { get; }
+
+        public TAppSettings Config { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -35,8 +38,8 @@ namespace Swisschain.Sdk.Server.Common
                 builder.AllowAnyMethod();
                 builder.AllowAnyOrigin();
             }));
-
-            services.AddSingleton(Configuration.Get<TAppSettings>());
+            
+            services.AddSingleton(Config);
 
             ConfigureServicesExt(services);
         }
