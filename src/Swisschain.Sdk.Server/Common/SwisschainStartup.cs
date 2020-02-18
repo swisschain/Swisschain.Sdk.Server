@@ -9,14 +9,18 @@ using Microsoft.OpenApi.Models;
 
 namespace Swisschain.Sdk.Server.Common
 {
-    public class SwisschainStartup
+    public class SwisschainStartup<TAppSettings>
+        where TAppSettings : class
     {
-        public SwisschainStartup(IConfiguration configuration)
+        public SwisschainStartup(IConfiguration configRoot)
         {
-            Configuration = configuration;
+            ConfigRoot = configRoot;
+            Config = ConfigRoot.Get<TAppSettings>();
         }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration ConfigRoot { get; }
+
+        public TAppSettings Config { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -34,6 +38,8 @@ namespace Swisschain.Sdk.Server.Common
                 builder.AllowAnyMethod();
                 builder.AllowAnyOrigin();
             }));
+            
+            services.AddSingleton(Config);
 
             ConfigureServicesExt(services);
         }
@@ -63,11 +69,11 @@ namespace Swisschain.Sdk.Server.Common
                 RegisterEndpoints(endpoints);
             });
 
-            app.UseSwagger();
-
+            app.UseSwagger(c => c.RouteTemplate = "api/{documentName}/swagger.json");
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "API V1");
+                c.SwaggerEndpoint("../../api/v1/swagger.json", "API V1");
+                c.RoutePrefix = "swagger/ui";
             });
 
             ConfigureExt(app, env);
