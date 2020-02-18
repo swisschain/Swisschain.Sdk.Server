@@ -24,33 +24,7 @@ namespace Swisschain.Sdk.Server.Common
 
             return host
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                .ConfigureWebHostDefaults(options => { })
                 .UseConsoleLifetime()
-                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
-                .ConfigureAppConfiguration((hostingContext, config) =>
-                {
-                    config.Sources.Clear();
-
-                    if (optionsBuilder.WebJsonConfigurationSourceBuilder != null)
-                    {
-                        config.AddWebJsonConfiguration(optionsBuilder.WebJsonConfigurationSourceBuilder);
-                    }
-
-                    // TODO: AddAzureBlobConfiguration()
-                    // TODO: AddSecretsManagerConfiguration
-
-                    config.AddJsonFile("appsettings.json", optional: true);
-                    config.AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: true);
-                    config.AddEnvironmentVariables();
-                })
-                .ConfigureServices(services =>
-                {
-                    if (optionsBuilder.LoggerFactory != null)
-                    {
-                        services.AddSingleton(optionsBuilder.LoggerFactory);
-                        services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
-                    }
-                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<TStartup>();
@@ -67,6 +41,32 @@ namespace Swisschain.Sdk.Server.Common
                             listenOptions.Protocols = HttpProtocols.Http2;
                         });
                     });
+                })
+                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    config.Sources.Clear();
+
+                    if (optionsBuilder.WebJsonConfigurationSourceBuilder != null)
+                    {
+                        config.AddWebJsonConfiguration(optionsBuilder.WebJsonConfigurationSourceBuilder);
+                    }
+
+                    // TODO: AddAzureBlobConfiguration()
+                    // TODO: AddSecretsManagerConfiguration
+
+                    config.AddJsonFile("appsettings.json", optional: true);
+                    config.AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json",
+                        optional: true);
+                    config.AddEnvironmentVariables();
+                })
+                .ConfigureServices(services =>
+                {
+                    if (optionsBuilder.LoggerFactory != null)
+                    {
+                        services.AddSingleton(optionsBuilder.LoggerFactory);
+                        services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
+                    }
                 });
         }
     }
