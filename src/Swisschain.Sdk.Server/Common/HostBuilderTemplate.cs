@@ -33,7 +33,7 @@ namespace Swisschain.Sdk.Server.Common
                     {
                         options.Listen(IPAddress.Any, optionsBuilder.RestPort, listenOptions =>
                         {
-                            listenOptions.Protocols = HttpProtocols.Http1;
+                            listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
                         });
 
                         options.Listen(IPAddress.Any, optionsBuilder.GrpcPort, listenOptions =>
