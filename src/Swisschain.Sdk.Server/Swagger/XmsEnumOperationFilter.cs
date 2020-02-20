@@ -23,22 +23,6 @@ namespace Swisschain.Sdk.Server.Swagger
             {
                 return;
             }
-
-            var invalidParameters = context.ApiDescription.ParameterDescriptions.Where(p => p.Type == null).ToArray();
-
-            if (invalidParameters.Any())
-            {
-                var invalidParameter = invalidParameters.First();
-                var message =
-                    $@"Invalid parameter found. Probably parameter source mismatched. (e.g. You specified [FromQuery] for the path parameter).
-
-Action: {context.ApiDescription?.ActionDescriptor.DisplayName}
-Relative path: {context.ApiDescription?.RelativePath}
-OperationId: {operation.OperationId}
-Parameter: {invalidParameter?.Name}
-Expected parameter source: {invalidParameter?.Source.DisplayName}";
-                throw new InvalidOperationException(message);
-            }
             
             foreach (var parameter in GetEnumParameters(context))
             {
@@ -53,7 +37,8 @@ Expected parameter source: {invalidParameter?.Source.DisplayName}";
             return context
                 .ApiDescription
                 .ParameterDescriptions
-                .Select(p => (Type: TryGetEnumType(p), Name: p.Name))
+                .Where(x => x.Type != null)
+                .Select(x => (Type: TryGetEnumType(x), Name: x.Name))
                 .Where(x => x.Type != null);
         }
 
