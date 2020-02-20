@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 using Serilog;
 
+[assembly: InternalsVisibleTo("Swisschain.Sdk.Server.Test")]
 namespace Swisschain.Sdk.Server.Configuration.WebJsonSettings
 {
     internal class WebJsonConfigurationProvider : ConfigurationProvider
@@ -24,13 +27,14 @@ namespace Swisschain.Sdk.Server.Configuration.WebJsonSettings
 
         public override void Load()
         {
+            var regex = new Regex("[\\[](.*)[\\]]", RegexOptions.Multiline);
             var options = new WebJsonConfigurationSourceBuilder();
 
             this.OptionsAction.Invoke(options);
 
             var timeout = options.Timeout == TimeSpan.Zero ? TimeSpan.FromSeconds(5) : options.Timeout;
             var url = options.Url;
-            
+
             if (options.Version != default)
             {
                 url = url.Contains("?")
@@ -49,7 +53,18 @@ namespace Swisschain.Sdk.Server.Configuration.WebJsonSettings
                 var settings = JObject.Parse(response.Content.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult());
 
                 Data = settings.GetLeafValues().ToDictionary(
-                    x => x.Path.Replace(".", ConfigurationPath.KeyDelimiter),
+                    x =>
+                    {
+                        var pathDelimited = x.Path.Replace(".", ConfigurationPath.KeyDelimiter);
+                        pathDelimited = regex.Replace(pathDelimited, match =>
+                        {
+                            if (match.Groups.Count == 2)
+                                return $":{match.Groups[1].Value}";
+                            
+                            return match.Value;
+                        });
+                        return pathDelimited;
+                    },
                     x => x.Value.ToString());
             }
             catch (HttpRequestException ex) when (options.IsOptional)
