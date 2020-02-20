@@ -6,6 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Swisschain.Sdk.Server.Swagger;
 
 namespace Swisschain.Sdk.Server.Common
 {
@@ -28,6 +30,10 @@ namespace Swisschain.Sdk.Server.Common
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = ApplicationInformation.AppName, Version = "v1" });
+                c.EnableXmsEnumExtension();
+                c.MakeResponseValueTypesRequired();
+
+                ConfigureSwaggerGen(c);
             });
 
             services.AddGrpc();
@@ -77,6 +83,10 @@ namespace Swisschain.Sdk.Server.Common
             });
 
             ConfigureExt(app, env);
+        }
+
+        protected virtual void ConfigureSwaggerGen(SwaggerGenOptions swaggerGenOptions)
+        {
         }
 
         protected virtual void ConfigureServicesExt(IServiceCollection services)
