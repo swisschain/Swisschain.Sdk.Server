@@ -8,28 +8,13 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Swisschain.Sdk.Server.Swagger
 {
-    internal class XmsEnumOperationFilter : IOperationFilter
+    internal class XmsEnumParameterFilter : IParameterFilter
     {
         private readonly XmsEnumExtensionsOptions _options;
 
-        public XmsEnumOperationFilter(XmsEnumExtensionsOptions options)
+        public XmsEnumParameterFilter(XmsEnumExtensionsOptions options)
         {
             _options = options;
-        }
-
-        public void Apply(OpenApiOperation operation, OperationFilterContext context)
-        {
-            if (operation.Parameters == null)
-            {
-                return;
-            }
-            
-            foreach (var parameter in GetEnumParameters(context))
-            {
-                var operationParameter = operation.Parameters.Single(p => p.Name == parameter.Name);
-
-                XmsEnumExtensionApplicator.Apply(operationParameter.Extensions, parameter.Type, _options);
-            }
         }
 
         private static IEnumerable<(Type Type, string Name)> GetEnumParameters(OperationFilterContext context)
@@ -44,6 +29,11 @@ namespace Swisschain.Sdk.Server.Swagger
 
         private static Type TryGetEnumType(ApiParameterDescription parameter)
         {
+            if (parameter.Type == null)
+            {
+                return null;
+            }
+
             if (parameter.Type.GetTypeInfo().IsEnum)
             {
                 return parameter.Type;
@@ -54,6 +44,16 @@ namespace Swisschain.Sdk.Server.Swagger
             return nullableUnderlyingType?.GetTypeInfo().IsEnum == true
                 ? nullableUnderlyingType 
                 : null;
+        }
+
+        public void Apply(OpenApiParameter parameter, ParameterFilterContext context)
+        {
+            var enumType = TryGetEnumType(context.ApiParameterDescription);
+
+            if (enumType != null)
+            {
+                XmsEnumExtensionApplicator.Apply(parameter.Extensions, enumType, _options);
+            }
         }
     }
 }
