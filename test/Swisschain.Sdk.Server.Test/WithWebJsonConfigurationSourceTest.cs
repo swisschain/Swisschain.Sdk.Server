@@ -8,10 +8,10 @@ using Xunit;
 
 namespace Swisschain.Sdk.Server.Test
 {
-    public class UnitTest1
+    public class WithWebJsonConfigurationSourceTest
     {
         [Fact(Skip = "Use to debug issues with config reading")]
-        public void Test1()
+        public void BuildHostWithSwisschainServiceTest()
         {
             var builder = new HostBuilder()
                 .SwisschainService<Startup>(options =>
