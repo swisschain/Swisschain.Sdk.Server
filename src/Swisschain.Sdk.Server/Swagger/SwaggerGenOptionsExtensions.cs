@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Swisschain.Sdk.Server.Swagger
@@ -22,6 +23,20 @@ namespace Swisschain.Sdk.Server.Swagger
         public static void MakeResponseValueTypesRequired(this SwaggerGenOptions swaggerOptions)
         {
             swaggerOptions.SchemaFilter<ResponseValueTypesRequiredSchemaFilter>();
+        }
+
+        public static void AddBearerAuthorization(this SwaggerGenOptions swaggerOptions)
+        {
+            swaggerOptions.SwaggerGeneratorOptions.OperationFilters.Add(new AuthorizationCheckSwaggerOperationFilter());
+            swaggerOptions.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description =
+                    "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345abcdef\"",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
         }
     }
 }
