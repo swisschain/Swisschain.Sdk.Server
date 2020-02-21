@@ -13,6 +13,7 @@ namespace Swisschain.Sdk.Server.Swagger
         /// <param name="options">"x-ms-enum" extensions options. Default value is <see cref="XmsEnumExtensionsOptions.UseEnums"/></param>
         public static void EnableXmsEnumExtension(this SwaggerGenOptions swaggerOptions, XmsEnumExtensionsOptions options = XmsEnumExtensionsOptions.UseEnums)
         {
+            swaggerOptions.ParameterFilter<XmsEnumParameterFilter>(options);
             swaggerOptions.SchemaFilter<XmsEnumSchemaFilter>(options);
             swaggerOptions.OperationFilter<XmsEnumOperationFilter>(options);
         }
