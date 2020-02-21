@@ -15,11 +15,11 @@ namespace Swisschain.Sdk.Server.Swagger
                 : enumType.Name;
             var modelAsString = options != XmsEnumExtensionsOptions.UseEnums;
 
-            extensions.Add("x-ms-enum", new OpenApiObject
+            extensions["x-ms-enum"] = new OpenApiObject
             {
                 ["name"] = new OpenApiString(name),
                 ["modelAsString"] = new OpenApiBoolean(modelAsString)
-            });
+            };
         }
     }
 }
