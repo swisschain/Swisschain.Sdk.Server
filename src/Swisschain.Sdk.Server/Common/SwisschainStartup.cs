@@ -1,3 +1,4 @@
+using System.Globalization;
 using Autofac;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,14 +32,20 @@ namespace Swisschain.Sdk.Server.Common
         {
             services.AddControllers().AddNewtonsoftJson(options =>
             {
-                options.SerializerSettings.Converters.Add(new StringEnumConverter());
-                options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                var namingStrategy = new CamelCaseNamingStrategy();
+
+                options.SerializerSettings.Converters.Add(new StringEnumConverter(namingStrategy));
+                options.SerializerSettings.NullValueHandling = NullValueHandling.Include;
                 options.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
+                options.SerializerSettings.Culture = CultureInfo.InvariantCulture;
+                options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                options.SerializerSettings.MissingMemberHandling = MissingMemberHandling.Error;
                 options.SerializerSettings.ContractResolver = new DefaultContractResolver
                 {
-                    NamingStrategy = new CamelCaseNamingStrategy()
+                    NamingStrategy = namingStrategy
                 };
             });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = ApplicationInformation.AppName, Version = "v1" });
@@ -47,6 +54,7 @@ namespace Swisschain.Sdk.Server.Common
 
                 ConfigureSwaggerGen(c);
             });
+            services.AddSwaggerGenNewtonsoftSupport();
 
             services.AddGrpc();
 
