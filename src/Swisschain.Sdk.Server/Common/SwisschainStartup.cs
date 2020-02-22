@@ -1,3 +1,4 @@
+using System.Globalization;
 using Autofac;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -6,6 +7,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Swisschain.Sdk.Server.Swagger;
 
 namespace Swisschain.Sdk.Server.Common
 {
@@ -24,11 +30,31 @@ namespace Swisschain.Sdk.Server.Common
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(options =>
+            {
+                var namingStrategy = new CamelCaseNamingStrategy();
+
+                options.SerializerSettings.Converters.Add(new StringEnumConverter(namingStrategy));
+                options.SerializerSettings.NullValueHandling = NullValueHandling.Include;
+                options.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
+                options.SerializerSettings.Culture = CultureInfo.InvariantCulture;
+                options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                options.SerializerSettings.MissingMemberHandling = MissingMemberHandling.Error;
+                options.SerializerSettings.ContractResolver = new DefaultContractResolver
+                {
+                    NamingStrategy = namingStrategy
+                };
+            });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = ApplicationInformation.AppName, Version = "v1" });
+                c.EnableXmsEnumExtension();
+                c.MakeResponseValueTypesRequired();
+
+                ConfigureSwaggerGen(c);
             });
+            services.AddSwaggerGenNewtonsoftSupport();
 
             services.AddGrpc();
 
@@ -77,6 +103,10 @@ namespace Swisschain.Sdk.Server.Common
             });
 
             ConfigureExt(app, env);
+        }
+
+        protected virtual void ConfigureSwaggerGen(SwaggerGenOptions swaggerGenOptions)
+        {
         }
 
         protected virtual void ConfigureServicesExt(IServiceCollection services)
