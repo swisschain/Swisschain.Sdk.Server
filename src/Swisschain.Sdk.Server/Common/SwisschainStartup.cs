@@ -2,6 +2,7 @@ using System.Globalization;
 using Autofac;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,7 +31,7 @@ namespace Swisschain.Sdk.Server.Common
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers().AddNewtonsoftJson(options =>
+            services.AddControllers(ConfigureControllers).AddNewtonsoftJson(options =>
             {
                 var namingStrategy = new CamelCaseNamingStrategy();
 
@@ -74,6 +75,8 @@ namespace Swisschain.Sdk.Server.Common
         {
             ConfigureContainerExt(builder);
         }
+
+
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -125,6 +128,11 @@ namespace Swisschain.Sdk.Server.Common
         }
 
         protected virtual void RegisterEndpoints(IEndpointRouteBuilder endpoints)
+        {
+
+        }
+
+        protected virtual void ConfigureControllers(MvcOptions options)
         {
 
         }
