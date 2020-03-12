@@ -14,6 +14,12 @@ namespace Swisschain.Sdk.Server.Common
 {
     public static class HostBuilderTemplate
     {
+        public static IHostBuilder SwisschainService<TStartup>(this IHostBuilder host,
+            Action<HostOptionsBuilder> optionsBuilderConfigurator) where TStartup : class
+        {
+            return SwisschainService<TStartup>(host, optionsBuilderConfigurator, builder => { });
+        }
+
         public static IHostBuilder SwisschainService<TStartup>(this IHostBuilder host, 
             Action<HostOptionsBuilder> optionsBuilderConfigurator,
             Action<IWebHostBuilder> optionsWebHostBuilder)
