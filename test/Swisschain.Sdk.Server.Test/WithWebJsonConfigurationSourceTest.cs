@@ -1,5 +1,7 @@
 using System;
 using System.Net.Http;
+using System.Runtime.ExceptionServices;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Swisschain.Sdk.Server.Common;
@@ -27,9 +29,12 @@ namespace Swisschain.Sdk.Server.Test
                             webJsonOptions.Version = ApplicationInformation.AppVersion;
                         });
                     }
-                });
+                },
+                    webBuilder => { webBuilder.UseTestServer(); });
 
-            builder.Build();
+            var host = builder.Build();
+            host.StartAsync().GetAwaiter().GetResult();
+            var client = host.GetTestClient();
         }
     }
 

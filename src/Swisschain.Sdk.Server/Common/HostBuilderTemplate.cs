@@ -14,7 +14,9 @@ namespace Swisschain.Sdk.Server.Common
 {
     public static class HostBuilderTemplate
     {
-        public static IHostBuilder SwisschainService<TStartup>(this IHostBuilder host, Action<HostOptionsBuilder> optionsBuilderConfigurator)
+        public static IHostBuilder SwisschainService<TStartup>(this IHostBuilder host, 
+            Action<HostOptionsBuilder> optionsBuilderConfigurator,
+            Action<IWebHostBuilder> optionsWebHostBuilder)
 
             where TStartup : class
         {
@@ -28,7 +30,6 @@ namespace Swisschain.Sdk.Server.Common
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<TStartup>();
-
                     webBuilder.ConfigureKestrel(options =>
                     {
                         options.Listen(IPAddress.Any, optionsBuilder.RestPort, listenOptions =>
@@ -41,6 +42,7 @@ namespace Swisschain.Sdk.Server.Common
                             listenOptions.Protocols = HttpProtocols.Http2;
                         });
                     });
+                    optionsWebHostBuilder(webBuilder);
                 })
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory())
                 .ConfigureAppConfiguration((hostingContext, config) =>
