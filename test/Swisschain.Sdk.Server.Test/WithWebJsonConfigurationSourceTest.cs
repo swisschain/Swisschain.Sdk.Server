@@ -30,7 +30,8 @@ namespace Swisschain.Sdk.Server.Test
                         });
                     }
                 },
-                    webBuilder => { webBuilder.UseTestServer(); });
+                    webBuilder => { webBuilder.UseTestServer(); },
+                    configurationBuilder => {});
 
             var host = builder.Build();
             host.StartAsync().GetAwaiter().GetResult();

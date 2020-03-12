@@ -17,12 +17,16 @@ namespace Swisschain.Sdk.Server.Common
         public static IHostBuilder SwisschainService<TStartup>(this IHostBuilder host,
             Action<HostOptionsBuilder> optionsBuilderConfigurator) where TStartup : class
         {
-            return SwisschainService<TStartup>(host, optionsBuilderConfigurator, builder => { });
+            return SwisschainService<TStartup>(host,
+                optionsBuilderConfigurator,
+                builder => { },
+                builder => { });
         }
 
-        public static IHostBuilder SwisschainService<TStartup>(this IHostBuilder host, 
+        public static IHostBuilder SwisschainService<TStartup>(this IHostBuilder host,
             Action<HostOptionsBuilder> optionsBuilderConfigurator,
-            Action<IWebHostBuilder> optionsWebHostBuilder)
+            Action<IWebHostBuilder> optionsWebHostBuilder,
+            Action<IConfigurationBuilder> optionsConfigurationBuilder)
 
             where TStartup : class
         {
@@ -67,6 +71,8 @@ namespace Swisschain.Sdk.Server.Common
                     config.AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json",
                         optional: true);
                     config.AddEnvironmentVariables();
+
+                    optionsConfigurationBuilder(config);
                 })
                 .ConfigureServices(services =>
                 {
