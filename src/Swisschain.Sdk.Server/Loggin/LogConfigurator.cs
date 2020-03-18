@@ -1,4 +1,5 @@
 using System;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Swisschain.Sdk.Server.Common;
@@ -7,9 +8,15 @@ namespace Swisschain.Sdk.Server.Loggin
 {
     public static class LogConfigurator
     {
-        public static ILoggerFactory Configure(string projectName = default, string seqUrl = default)
+        public static ILoggerFactory Configure(string productName = default, string seqUrl = default)
         {
+            var configRoot = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: true)
+                .AddJsonFile($"appsettings.{ApplicationEnvironment.Environment}.json", optional: true)
+                .Build();
+
             var config = new LoggerConfiguration()
+                .ReadFrom.Configuration(configRoot)
                 .Enrich.FromLogContext()
                 .Enrich.WithExceptionData()
                 .Enrich.WithCorrelationIdHeader()
@@ -20,9 +27,9 @@ namespace Swisschain.Sdk.Server.Loggin
                 .Enrich.WithProperty("started-at", ApplicationInformation.StartedAt)
                 .WriteTo.Console();
 
-            if (projectName != default)
+            if (productName != default)
             {
-                config.Enrich.WithProperty("project-name", projectName);
+                config.Enrich.WithProperty("product-name", productName);
             }
 
             if (seqUrl != default)
