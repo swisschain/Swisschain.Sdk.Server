@@ -8,7 +8,7 @@ namespace Swisschain.Sdk.Server.Loggin
 {
     public static class LogConfigurator
     {
-        public static ILoggerFactory Configure(string productName = default, string appType = default, string seqUrl = default)
+        public static ILoggerFactory Configure(string productName = default, string seqUrl = default)
         {
             var configRoot = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true)
@@ -30,11 +30,6 @@ namespace Swisschain.Sdk.Server.Loggin
             if (productName != default)
             {
                 config.Enrich.WithProperty("product-name", productName);
-            }
-
-            if (appType != default)
-            {
-                config.Enrich.WithProperty("app-type", appType);
             }
 
             if (seqUrl != default)
