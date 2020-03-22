@@ -31,21 +31,28 @@ namespace Swisschain.Sdk.Server.Common
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers(ConfigureControllers).AddNewtonsoftJson(options =>
-            {
-                var namingStrategy = new CamelCaseNamingStrategy();
-
-                options.SerializerSettings.Converters.Add(new StringEnumConverter(namingStrategy));
-                options.SerializerSettings.NullValueHandling = NullValueHandling.Include;
-                options.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
-                options.SerializerSettings.Culture = CultureInfo.InvariantCulture;
-                options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
-                options.SerializerSettings.MissingMemberHandling = MissingMemberHandling.Error;
-                options.SerializerSettings.ContractResolver = new DefaultContractResolver
+            services
+                .AddControllers(options =>
                 {
-                    NamingStrategy = namingStrategy
-                };
-            });
+                    options.Filters.Add(new ProducesAttribute("application/json"));
+
+                    ConfigureControllers(options);
+                })
+                .AddNewtonsoftJson(options =>
+                {
+                    var namingStrategy = new CamelCaseNamingStrategy();
+
+                    options.SerializerSettings.Converters.Add(new StringEnumConverter(namingStrategy));
+                    options.SerializerSettings.NullValueHandling = NullValueHandling.Include;
+                    options.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
+                    options.SerializerSettings.Culture = CultureInfo.InvariantCulture;
+                    options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                    options.SerializerSettings.MissingMemberHandling = MissingMemberHandling.Error;
+                    options.SerializerSettings.ContractResolver = new DefaultContractResolver
+                    {
+                        NamingStrategy = namingStrategy
+                    };
+                });
 
             services.AddSwaggerGen(c =>
             {
@@ -134,7 +141,6 @@ namespace Swisschain.Sdk.Server.Common
 
         protected virtual void ConfigureControllers(MvcOptions options)
         {
-
         }
     }
 }
