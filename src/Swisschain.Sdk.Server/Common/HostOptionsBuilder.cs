@@ -8,15 +8,15 @@ namespace Swisschain.Sdk.Server.Common
     {
         public HostOptionsBuilder()
         {
-            RestPort = 5000;
+            HttpPort = 5000;
             GrpcPort = 5001;
         }
 
         internal ILoggerFactory LoggerFactory { get; private set; }
 
-        internal int RestPort { get; private set; }
+        internal int HttpPort { get; set; }
 
-        internal int GrpcPort { get; private set; }
+        internal int GrpcPort { get; set; }
 
         internal Action<WebJsonConfigurationSourceBuilder> WebJsonConfigurationSourceBuilder { get; private set; }
 
@@ -27,9 +27,9 @@ namespace Swisschain.Sdk.Server.Common
             return this;
         }
 
-        public HostOptionsBuilder UsePorts(int restPort, int grpcPort)
+        public HostOptionsBuilder UsePorts(int httpPort, int grpcPort)
         {
-            RestPort = restPort;
+            HttpPort = httpPort;
             GrpcPort = grpcPort;
 
             return this;
