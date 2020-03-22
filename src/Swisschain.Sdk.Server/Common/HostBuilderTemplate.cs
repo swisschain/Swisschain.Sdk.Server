@@ -32,6 +32,16 @@ namespace Swisschain.Sdk.Server.Common
         {
             var optionsBuilder = new HostOptionsBuilder();
 
+            if (ApplicationEnvironment.Config["HttpPort"] != default)
+            {
+                optionsBuilder.HttpPort = int.Parse(ApplicationEnvironment.Config["HttpPort"]);
+            }
+
+            if (ApplicationEnvironment.Config["GrpcPort"] != default)
+            {
+                optionsBuilder.GrpcPort = int.Parse(ApplicationEnvironment.Config["GrpcPort"]);
+            }
+
             optionsBuilderConfigurator.Invoke(optionsBuilder);
 
             return host
@@ -42,7 +52,7 @@ namespace Swisschain.Sdk.Server.Common
                     webBuilder.UseStartup<TStartup>();
                     webBuilder.ConfigureKestrel(options =>
                     {
-                        options.Listen(IPAddress.Any, optionsBuilder.RestPort, listenOptions =>
+                        options.Listen(IPAddress.Any, optionsBuilder.HttpPort, listenOptions =>
                         {
                             listenOptions.Protocols = HttpProtocols.Http1;
                         });
