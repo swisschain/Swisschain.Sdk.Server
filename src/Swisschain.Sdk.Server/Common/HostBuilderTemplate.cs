@@ -69,17 +69,18 @@ namespace Swisschain.Sdk.Server.Common
                 {
                     config.Sources.Clear();
 
-                    if (optionsBuilder.WebJsonConfigurationSourceBuilder != null)
+                    foreach (var remoteSource in optionsBuilder.WebJsonConfigurationSourcesBuilder.Sources)
                     {
-                        config.AddWebJsonConfiguration(optionsBuilder.WebJsonConfigurationSourceBuilder);
+                        config.AddWebJsonConfiguration(WebJsonHttpClientProvider.DefaultClient, 
+                            remoteSource.Url,
+                            remoteSource.IsOptional);
                     }
 
                     // TODO: AddAzureBlobConfiguration()
                     // TODO: AddSecretsManagerConfiguration
 
                     config.AddJsonFile("appsettings.json", optional: true);
-                    config.AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json",
-                        optional: true);
+                    config.AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: true);
                     config.AddEnvironmentVariables();
 
                     optionsConfigurationBuilder(config);

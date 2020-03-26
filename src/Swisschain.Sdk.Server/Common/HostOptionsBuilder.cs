@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Swisschain.Sdk.Server.Configuration.WebJsonSettings;
 
@@ -10,6 +11,7 @@ namespace Swisschain.Sdk.Server.Common
         {
             HttpPort = 5000;
             GrpcPort = 5001;
+            WebJsonConfigurationSourcesBuilder = new WebJsonConfigurationSourcesBuilder();
         }
 
         internal ILoggerFactory LoggerFactory { get; private set; }
@@ -18,7 +20,7 @@ namespace Swisschain.Sdk.Server.Common
 
         internal int GrpcPort { get; set; }
 
-        internal Action<WebJsonConfigurationSourceBuilder> WebJsonConfigurationSourceBuilder { get; private set; }
+        internal WebJsonConfigurationSourcesBuilder WebJsonConfigurationSourcesBuilder { get; }
 
         public HostOptionsBuilder UseLoggerFactory(ILoggerFactory loggerFactory)
         {
@@ -36,30 +38,29 @@ namespace Swisschain.Sdk.Server.Common
         }
 
         /// <summary>
-        /// Add web json configuration source - a app settings json accessible by an url.
+        /// Adds a web json configuration source - an app settings json accessible by an url.
         /// </summary>
-        /// <param name="remoteSettingsUrl">If null web json configuration source will not be used</param>
-        public HostOptionsBuilder WithWebJsonConfigurationSource(string remoteSettingsUrl)
+        public HostOptionsBuilder AddWebJsonConfigurationSource(string url, bool isOptional = true, TimeSpan timeout = default)
         {
-            if (remoteSettingsUrl != default)
+            WebJsonConfigurationSourcesBuilder.Add(new WebJsonConfigurationSourcesBuilder.Source
             {
-                WebJsonConfigurationSourceBuilder = options =>
-                {
-                    options.Url = remoteSettingsUrl;
-                    options.IsOptional = ApplicationEnvironment.IsDevelopment;
-                    options.Version = ApplicationInformation.AppVersion;
-                };
-            }
-            
+                Url = url,
+                IsOptional = isOptional,
+                Timeout = timeout
+            });
+
             return this;
         }
 
         /// <summary>
-        /// Add web json configuration source - a app settings json accessible by an url.
+        /// Adds a web json configuration sources - an app settings json accessible by an url.
         /// </summary>
-        public HostOptionsBuilder WithWebJsonConfigurationSource(Action<WebJsonConfigurationSourceBuilder> builder)
+        public HostOptionsBuilder AddWebJsonConfigurationSources(IReadOnlyCollection<string> urls, bool areOptional = true, TimeSpan timeout = default)
         {
-            WebJsonConfigurationSourceBuilder = builder;
+            foreach (var url in urls)
+            {
+                AddWebJsonConfigurationSource(url, areOptional, timeout);
+            }
 
             return this;
         }
