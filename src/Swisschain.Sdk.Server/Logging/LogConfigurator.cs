@@ -1,19 +1,34 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Swisschain.Sdk.Server.Common;
+using Swisschain.Sdk.Server.Configuration.WebJsonSettings;
 
-namespace Swisschain.Sdk.Server.Loggin
+namespace Swisschain.Sdk.Server.Logging
 {
     public static class LogConfigurator
     {
-        public static ILoggerFactory Configure(string productName = default, string seqUrl = default)
+        public static ILoggerFactory Configure(string productName = default,
+            string seqUrl = default, 
+            IReadOnlyCollection<string> remoteSettingsUrls = default)
         {
-            var configRoot = new ConfigurationBuilder()
+            var configBuilder = new ConfigurationBuilder();
+                
+            if (remoteSettingsUrls != null)
+            {
+                foreach (var remoteSettingsUrl in remoteSettingsUrls)
+                {
+                    configBuilder.AddWebJsonConfiguration(WebJsonHttpClientProvider.DefaultClient, remoteSettingsUrl, isOptional: true);
+                }
+            }
+
+            configBuilder
                 .AddJsonFile("appsettings.json", optional: true)
-                .AddJsonFile($"appsettings.{ApplicationEnvironment.Environment}.json", optional: true)
-                .Build();
+                .AddJsonFile($"appsettings.{ApplicationEnvironment.Environment}.json", optional: true);
+
+            var configRoot = configBuilder.Build();
 
             var config = new LoggerConfiguration()
                 .ReadFrom.Configuration(configRoot)

@@ -1,29 +1,28 @@
-﻿using System;
+﻿using System.Net.Http;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 
 namespace Swisschain.Sdk.Server.Configuration.WebJsonSettings
 {
     public static class ConfigurationBuilderExtensions
     {
-        public static IConfigurationBuilder AddWebJsonConfiguration(
-            this IConfigurationBuilder builder, 
-            Action<WebJsonConfigurationSourceBuilder> optionsAction)
-        {
-            return builder.Add(new WebJsonConfigurationSource(optionsAction));
-        }
-
         public static IConfigurationBuilder AddWebJsonConfiguration(this IConfigurationBuilder builder, 
-            string url, 
-            string version = default, 
-            bool isOptional = false,
-            TimeSpan timeout = default)
+            HttpClient client,
+            string url,
+            bool isOptional = false)
         {
-            return builder.Add(new WebJsonConfigurationSource(options =>
+            try
             {
-                options.Url = url;
-                options.Version = version;
-                options.IsOptional = isOptional;
-            }));
+                var stream = client.GetStreamAsync(url).ConfigureAwait(false).GetAwaiter().GetResult();
+
+                builder.AddJsonStream(stream);
+            }
+            catch (HttpRequestException ex) when (isOptional)
+            {
+                Log.Warning(ex, "Failed to load optional remote settings, skipping.");
+            }
+
+            return builder;
         }
     }
 }
