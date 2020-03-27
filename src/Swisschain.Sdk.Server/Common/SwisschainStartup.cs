@@ -19,8 +19,11 @@ namespace Swisschain.Sdk.Server.Common
     public class SwisschainStartup<TAppSettings>
         where TAppSettings : class
     {
-        public SwisschainStartup(IConfiguration configRoot)
+        private readonly bool _useAuthentication = false;
+            
+        public SwisschainStartup(IConfiguration configRoot, bool useAuthentication = false)
         {
+            _useAuthentication = useAuthentication;
             ConfigRoot = configRoot;
             Config = ConfigRoot.Get<TAppSettings>();
         }
@@ -96,6 +99,9 @@ namespace Swisschain.Sdk.Server.Common
 
             app.UseCors();
 
+            if (_useAuthentication)
+                app.UseAuthentication();
+            
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
