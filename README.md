@@ -38,9 +38,9 @@ Your JWT token SHOULD containt:
 
 * `exp` claim [RFC-7519](https://tools.ietf.org/html/rfc7519#section-4.1.4)
 * `aud` claim [RFC-7519](https://tools.ietf.org/html/rfc7519#section-4.1.3). JWT token should contain an audience specified in the `AddJwtAuth` call. 
-It can contain an array of audience still one of which is required by your service.
+It can contain an array of the audience still one of which is required by your service.
 
-### Scope-base authorization
+### Scope-based authorization
 
 If you want to add scope-based authorization for HTTP endpoints in your service, add `services.AddScopeBasedAuthorization` call to your `Startup.ConfigureServicesExt`:
 
@@ -56,7 +56,7 @@ public class Startup : SwisschainStartup<AppConfig>
 }
 ```
 
-Then you can use `Authorize` attribute on your controllers and action-methods to require a scope for requests execution:
+Then you can use `Authorize` attribute on your controllers and action-methods to require scope for requests execution:
 
 ```c#
 [Route("api/orders")]
@@ -78,10 +78,8 @@ public class OrdersController : ControllerBase
 }
 ```
 
-Your JWT token should contain the scope ([rfc8693](https://tools.ietf.org/html/rfc8693)) spceified on your controller or action method. You can use `Authorize` attribute without
-any scope still just to require the request to be authorized.
+Your JWT token should contain the scope ([rfc8693](https://tools.ietf.org/html/rfc8693)) specified on your controller or action method. You can use `Authorize` attribute without any scope still just to require the request to be authorized.
 
-Scopes format:
+#### Scopes format
 
-`<api-name>.swisschain.io/<resources>:<operation>`. You can use as granular scopes for your service as you need. For instance, you can omit operation, resource or event api-name, 
-if you don't need it and make scopes more granular later on.
+`<api-name>.swisschain.io/<resources>:<operation>`. You can use as granular scopes for your service as you need. For instance, you can omit operation, resource or event api-name,  if you don't need it and make scopes more granular later on.
