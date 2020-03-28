@@ -19,7 +19,7 @@ namespace Swisschain.Sdk.Server.Authorization
         {
             // Split the scopes string into an array 
             var scopes = context.User
-                .FindAll(c => c.Type == "scope" && new Uri(c.Issuer) == new Uri(requirement.Issuer))
+                .FindAll(c => c.Type == "scope")
                 .SelectMany(s => s.Value.Split(' '));
 
             // Succeed if the scope array contains the required scope

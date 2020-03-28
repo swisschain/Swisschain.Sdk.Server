@@ -6,13 +6,11 @@ namespace Swisschain.Sdk.Server.Authorization
 {
     public class AuthorizationPolicyProvider : DefaultAuthorizationPolicyProvider
     {
-        private readonly string _issuer;
         private readonly AuthorizationOptions _options;
 
-        public AuthorizationPolicyProvider(IOptions<AuthorizationOptions> options, string issuer) : 
+        public AuthorizationPolicyProvider(IOptions<AuthorizationOptions> options) : 
             base(options)
         {
-            _issuer = issuer;
             _options = options.Value;
         }
 
@@ -24,7 +22,7 @@ namespace Swisschain.Sdk.Server.Authorization
             if (policy == null)
             {
                 policy = new AuthorizationPolicyBuilder()
-                    .AddRequirements(new HasScopeRequirement(policyName, _issuer))
+                    .AddRequirements(new HasScopeRequirement(policyName))
                     .Build();
 
                 // Add policy to the AuthorizationOptions, so we don't have to re-create it each time

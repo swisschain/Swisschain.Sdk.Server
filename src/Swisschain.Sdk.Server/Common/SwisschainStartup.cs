@@ -1,5 +1,7 @@
 using System.Globalization;
+using System.Text;
 using Autofac;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +9,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -19,11 +22,12 @@ namespace Swisschain.Sdk.Server.Common
     public class SwisschainStartup<TAppSettings>
         where TAppSettings : class
     {
-        private readonly bool _useAuthentication = false;
-            
-        public SwisschainStartup(IConfiguration configRoot, bool useAuthentication = false)
+        private bool _useJwtAuth;
+        private string _jwtSecret;
+        private string _jwtAudience;
+
+        public SwisschainStartup(IConfiguration configRoot)
         {
-            _useAuthentication = useAuthentication;
             ConfigRoot = configRoot;
             Config = ConfigRoot.Get<TAppSettings>();
         }
@@ -31,6 +35,13 @@ namespace Swisschain.Sdk.Server.Common
         public IConfiguration ConfigRoot { get; }
 
         public TAppSettings Config { get; }
+
+        protected void AddJwtAuth(string secret, string audience)
+        {
+            _useJwtAuth = true;
+            _jwtSecret = secret;
+            _jwtAudience = audience;
+        }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -63,6 +74,11 @@ namespace Swisschain.Sdk.Server.Common
                 c.EnableXmsEnumExtension();
                 c.MakeResponseValueTypesRequired();
 
+                if (_useJwtAuth)
+                {
+                    c.AddJwtBearerAuthorization();
+                }
+
                 ConfigureSwaggerGen(c);
             });
             services.AddSwaggerGenNewtonsoftSupport();
@@ -78,6 +94,30 @@ namespace Swisschain.Sdk.Server.Common
             
             services.AddSingleton(Config);
 
+            if (_useJwtAuth)
+            {
+                services
+                    .AddAuthentication(x =>
+                    {
+                        x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                        x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                    })
+                    .AddJwtBearer(x =>
+                    {
+                        x.RequireHttpsMetadata = false;
+                        x.SaveToken = true;
+                        x.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtSecret)),
+                            ValidateIssuer = false,
+                            ValidateAudience = true,
+                            ValidAudience = _jwtAudience,
+                            ValidateLifetime = true
+                        };
+                    });
+            }
+
             ConfigureServicesExt(services);
         }
 
@@ -85,9 +125,7 @@ namespace Swisschain.Sdk.Server.Common
         {
             ConfigureContainerExt(builder);
         }
-
-
-
+        
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -99,7 +137,7 @@ namespace Swisschain.Sdk.Server.Common
 
             app.UseCors();
 
-            if (_useAuthentication)
+            if (_useJwtAuth)
                 app.UseAuthentication();
             
             app.UseAuthorization();

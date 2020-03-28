@@ -12,10 +12,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9069F65A-F79B-4156-84FF-43445ED69971}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\DeploySdkNuget.yml = .github\workflows\DeploySdkNuget.yml
+		README.md = README.md
 		.github\workflows\ValidateCommit.yml = .github\workflows\ValidateCommit.yml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestServer", "TestServer\TestServer.csproj", "{EED502FB-CC4C-497D-9E30-6E49284148AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestServer", "TestServer\TestServer.csproj", "{EED502FB-CC4C-497D-9E30-6E49284148AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
