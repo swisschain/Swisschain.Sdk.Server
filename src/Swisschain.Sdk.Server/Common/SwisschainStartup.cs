@@ -24,6 +24,7 @@ namespace Swisschain.Sdk.Server.Common
     {
         private bool _useJwtAuth;
         private string _jwtSecret;
+        private string _jwtAudience;
 
         public SwisschainStartup(IConfiguration configRoot)
         {
@@ -35,10 +36,11 @@ namespace Swisschain.Sdk.Server.Common
 
         public TAppSettings Config { get; }
 
-        protected void AddJwtAuth(string jwtSecret)
+        protected void AddJwtAuth(string secret, string audience)
         {
             _useJwtAuth = true;
-            _jwtSecret = jwtSecret;
+            _jwtSecret = secret;
+            _jwtAudience = audience;
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -109,7 +111,8 @@ namespace Swisschain.Sdk.Server.Common
                             ValidateIssuerSigningKey = true,
                             IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtSecret)),
                             ValidateIssuer = false,
-                            ValidateAudience = false,
+                            ValidateAudience = true,
+                            ValidAudience = _jwtAudience,
                             ValidateLifetime = true
                         };
                     });

@@ -13,7 +13,7 @@ public class Startup : SwisschainStartup<AppConfig>
 {
     public Startup(IConfiguration config) : base(config)
     {
-        AddJwtAuth(Config.Auth.JwtSecret);
+        AddJwtAuth(Config.Auth.JwtSecret, "exchange.swisschain.io");
     }
 }
 ```
@@ -33,6 +33,11 @@ public class WhoAmIController : ControllerBase
     }
 }
 ```
+
+Your JWT token SHOULD containt:
+
+* `exp` claim [RFC-7519](https://tools.ietf.org/html/rfc7519#section-4.1.4)
+* `aud` claim [RFC-7519](https://tools.ietf.org/html/rfc7519#section-4.1.3)
 
 ### Scope-base authorization
 
@@ -57,17 +62,19 @@ Then you can use `Authorize` attribute on your controllers and action-methods to
 public class OrdersController : ControllerBase
 {
     [HttpGet)]
-    [Authorize("exchange.swisschain/orders:get")]
+    [Authorize("exchange.swisschain.io/orders:get")]
     public async Task<IActionResult> Get()
     {
         ...
     }
     
     [HttpGet)]
-    [Authorize("exchange.swisschain/orders:add")]
+    [Authorize("exchange.swisschain.io/orders:add")]
     public async Task<IActionResult> Add()
     {
         ...
     }
 }
 ```
+
+Your JWT token should contains scope claim.
