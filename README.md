@@ -5,7 +5,7 @@ SDK for HTTP and gRPC services.
 ## Logging
 
 Specify `HOSTNAME` environment variable on your local machine to distinguish your local logs from the rest of the logs in the centralized Seq instance.
-If `HOSTNAME` is empty OS user name will be used instead.
+If `HOSTNAME` is empty, OS user name will be used instead.
 
 ## Auth
 
