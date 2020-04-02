@@ -37,7 +37,7 @@ namespace Swisschain.Sdk.Server.Logging
                 .Enrich.WithCorrelationIdHeader()
                 .Enrich.WithProperty("app-name", ApplicationInformation.AppName)
                 .Enrich.WithProperty("app-version", ApplicationInformation.AppVersion)
-                .Enrich.WithProperty("host-name", ApplicationEnvironment.HostName)
+                .Enrich.WithProperty("host-name", ApplicationEnvironment.HostName ?? ApplicationEnvironment.UserName)
                 .Enrich.WithProperty("environment", ApplicationEnvironment.Environment)
                 .Enrich.WithProperty("started-at", ApplicationInformation.StartedAt)
                 .WriteTo.Console();

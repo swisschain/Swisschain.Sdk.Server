@@ -2,6 +2,11 @@
 
 SDK for HTTP and gRPC services.
 
+## Logging
+
+Specify `HOSTNAME` environment variable on your local machine to distinguish your local logs from the rest of the logs in the centralized Seq instance.
+If `HOSTNAME` is empty OS user name will be used instead.
+
 ## Auth
 
 ### JWT authentication
@@ -39,6 +44,11 @@ Your JWT token SHOULD containt:
 * `exp` claim [RFC-7519](https://tools.ietf.org/html/rfc7519#section-4.1.4)
 * `aud` claim [RFC-7519](https://tools.ietf.org/html/rfc7519#section-4.1.3). JWT token should contain an audience specified in the `AddJwtAuth` call. 
 It can contain an array of the audience still one of which is required by your service.
+
+#### Debugging and developing
+
+For the developing and debugging purposes you can get JWT token using [jwt.io](https://jwt.io). Just put all required claims to the payload and the same secret as you've specified in
+`AddJwtAuth` call in your service.
 
 ### Scope-based authorization
 

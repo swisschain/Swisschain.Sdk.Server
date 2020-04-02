@@ -11,6 +11,7 @@ namespace Swisschain.Sdk.Server.Common
             Config = configBuilder.Build();
             Environment = Config["ASPNETCORE_ENVIRONMENT"];
             HostName = Config["HOSTNAME"];
+            UserName = System.Environment.UserName;
         }
 
         /// <summary>
@@ -22,6 +23,8 @@ namespace Swisschain.Sdk.Server.Common
         public static string Environment { get; }
 
         public static string HostName { get; }
+
+        public static string UserName { get; }
 
         public static bool IsDevelopment => Environment == "Development";
         
