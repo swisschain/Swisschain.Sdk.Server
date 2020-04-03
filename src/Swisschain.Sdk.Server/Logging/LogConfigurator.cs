@@ -11,7 +11,6 @@ namespace Swisschain.Sdk.Server.Logging
     public static class LogConfigurator
     {
         public static ILoggerFactory Configure(string productName = default,
-            string seqUrl = default, 
             IReadOnlyCollection<string> remoteSettingsUrls = default)
         {
             var configBuilder = new ConfigurationBuilder();
@@ -26,7 +25,8 @@ namespace Swisschain.Sdk.Server.Logging
 
             configBuilder
                 .AddJsonFile("appsettings.json", optional: true)
-                .AddJsonFile($"appsettings.{ApplicationEnvironment.Environment}.json", optional: true);
+                .AddJsonFile($"appsettings.{ApplicationEnvironment.Environment}.json", optional: true)
+                .AddEnvironmentVariables();
 
             var configRoot = configBuilder.Build();
 
@@ -47,11 +47,13 @@ namespace Swisschain.Sdk.Server.Logging
                 config.Enrich.WithProperty("product-name", productName);
             }
 
+            var seqUrl = configRoot["SeqUrl"];
+
             if (seqUrl != default)
             {
                 config.WriteTo.Seq(seqUrl, period: TimeSpan.FromSeconds(1));
             }
-                
+
             Log.Logger = config.CreateLogger();
 
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>

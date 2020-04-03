@@ -21,7 +21,6 @@ namespace TestServer
 
             using var loggerFactory = LogConfigurator.Configure(
                 "Swisschain.Sdk",
-                ApplicationEnvironment.Config["SeqUrl"],
                 remoteSettingsUrlsConfig.RemoteSettingsUrls);
 
             var logger = loggerFactory.CreateLogger<Program>();

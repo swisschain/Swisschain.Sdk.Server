@@ -7,6 +7,8 @@ SDK for HTTP and gRPC services.
 Specify `HOSTNAME` environment variable on your local machine to distinguish your local logs from the rest of the logs in the centralized Seq instance.
 If `HOSTNAME` is empty OS user name will be used instead.
 
+Spcify `SeqUrl` with [Seq](https://datalust.co/seq) url in the json settings or in the environment variables to forward logs to the Seq.
+
 ## Auth
 
 ### JWT authentication
