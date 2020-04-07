@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Swisschain.Sdk.Server.WebApi.Pagination
@@ -8,7 +6,7 @@ namespace Swisschain.Sdk.Server.WebApi.Pagination
     public class PaginationRequest<T>
     {
         [FromQuery(Name = "order")]
-        public PaginationOrder Order { get; set; }
+        public ListSortDirection Order { get; set; }
 
         [FromQuery(Name = "cursor")]
         public T Cursor { get; set; }
