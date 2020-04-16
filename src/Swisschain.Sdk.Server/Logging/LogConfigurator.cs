@@ -37,6 +37,7 @@ namespace Swisschain.Sdk.Server.Logging
                 .Enrich.WithExceptionData()
                 .Enrich.WithCorrelationIdHeader()
                 .Enrich.WithProperty("app-version", ApplicationInformation.AppVersion)
+                .Enrich.WithProperty("app-name", ApplicationInformation.AppName)
                 .Enrich.WithProperty("host-name", ApplicationEnvironment.HostName ?? ApplicationEnvironment.UserName)
                 .Enrich.WithProperty("environment", ApplicationEnvironment.Environment)
                 .Enrich.WithProperty("started-at", ApplicationInformation.StartedAt)
@@ -45,24 +46,6 @@ namespace Swisschain.Sdk.Server.Logging
             if (productName != default)
             {
                 config.Enrich.WithProperty("product-name", productName);
-
-                var appName = string.Join('.', ApplicationInformation.AppName
-                    .Split('.', StringSplitOptions.RemoveEmptyEntries)
-                    .SkipWhile(x => x != productName)
-                    .Skip(1)
-                    .ToArray());
-
-                if (string.IsNullOrEmpty(appName))
-                {
-                    appName = ApplicationInformation.AppName;
-                }
-
-                config.Enrich.WithProperty("app-name", appName);
-
-            }
-            else
-            {
-                config.Enrich.WithProperty("app-name", ApplicationInformation.AppName);
             }
 
             var seqUrl = configRoot["SeqUrl"];

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 
 namespace Swisschain.Sdk.Server.Common
@@ -11,7 +12,13 @@ namespace Swisschain.Sdk.Server.Common
             
             var name = Assembly.GetEntryAssembly()?.GetName();
             
-            AppName = name?.Name;
+            var nameSegments = (name?.Name ?? string.Empty).Split('.', StringSplitOptions.RemoveEmptyEntries);
+
+            if (nameSegments.Length > 2)
+            {
+                AppName = string.Join('.', nameSegments.Skip(1));
+            }
+
             AppVersion = name?.Version.ToString();
         }
 
