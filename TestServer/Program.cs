@@ -20,7 +20,7 @@ namespace TestServer
             var remoteSettingsUrlsConfig = ApplicationEnvironment.Config.Get<RemoteSettingsUrlsConfig>();
 
             using var loggerFactory = LogConfigurator.Configure(
-                "Swisschain.Sdk",
+                "Sdk",
                 remoteSettingsUrlsConfig.RemoteSettingsUrls);
 
             var logger = loggerFactory.CreateLogger<Program>();
