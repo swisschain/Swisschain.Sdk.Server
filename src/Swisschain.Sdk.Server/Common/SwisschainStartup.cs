@@ -91,7 +91,7 @@ namespace Swisschain.Sdk.Server.Common
                 builder.AllowAnyMethod();
                 builder.AllowAnyOrigin();
             }));
-            
+
             services.AddSingleton(Config);
 
             if (_useJwtAuth)
@@ -125,7 +125,7 @@ namespace Swisschain.Sdk.Server.Common
         {
             ConfigureContainerExt(builder);
         }
-        
+
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -133,13 +133,15 @@ namespace Swisschain.Sdk.Server.Common
                 app.UseDeveloperExceptionPage();
             }
 
+            ConfigureMiddleware(app, env);
+
             app.UseRouting();
 
             app.UseCors();
 
             if (_useJwtAuth)
                 app.UseAuthentication();
-            
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -184,6 +186,10 @@ namespace Swisschain.Sdk.Server.Common
         }
 
         protected virtual void ConfigureControllers(MvcOptions options)
+        {
+        }
+
+        protected virtual void ConfigureMiddleware(IApplicationBuilder app, IWebHostEnvironment env)
         {
         }
     }
