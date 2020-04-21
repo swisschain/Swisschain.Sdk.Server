@@ -84,6 +84,13 @@ namespace Swisschain.Sdk.Server.Logging
             var disableConsole = configRoot["disableConsoleLogOutput"];
             if (disableConsole?.ToLower() != "false")
             {
+                var color = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Log output to console is enabled.");
+                Console.ForegroundColor = color;
+                Console.WriteLine(
+                    "To disable output please change setting 'disableConsoleLogOutput' to 'true' (see config or environment variables)");
+
                 config.WriteTo.Console();
             }
             else
@@ -93,7 +100,7 @@ namespace Swisschain.Sdk.Server.Logging
                 Console.WriteLine("Log output to console is disabled.");
                 Console.ForegroundColor = color;
                 Console.WriteLine(
-                    "To enable output please change setting 'disableConsoleLogOutput' to 'true' (see config or environment variables)");
+                    "To enable output please change setting 'disableConsoleLogOutput' to 'false' (see config or environment variables)");
             }
         }
 
@@ -112,12 +119,12 @@ namespace Swisschain.Sdk.Server.Logging
             var elasticsearchUrlsConfig = configRoot.Get<ElasticsearchConfig>()?.ElasticsearchLogs;
 
 
-            if (elasticsearchUrlsConfig?.ElasticsearchNodeUrls != null && elasticsearchUrlsConfig.ElasticsearchNodeUrls.Any())
+            if (elasticsearchUrlsConfig?.NodeUrls != null && elasticsearchUrlsConfig.NodeUrls.Any())
             {
                 var indexPrefix = elasticsearchUrlsConfig?.IndexPrefixName ?? "logs";
 
                 config.WriteTo.Elasticsearch(
-                    new ElasticsearchSinkOptions(elasticsearchUrlsConfig.ElasticsearchNodeUrls.Select(u => new Uri(u)))
+                    new ElasticsearchSinkOptions(elasticsearchUrlsConfig.NodeUrls.Select(u => new Uri(u)))
                     {
                         AutoRegisterTemplate = true,
                         AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv6,
@@ -128,7 +135,7 @@ namespace Swisschain.Sdk.Server.Logging
 
         private sealed class ElasticsearchUrlsConfig
         {
-            public IReadOnlyCollection<string> ElasticsearchNodeUrls { get; set; }
+            public IReadOnlyCollection<string> NodeUrls { get; set; }
             public string IndexPrefixName { get; set; }
         }
 
