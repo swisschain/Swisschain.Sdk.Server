@@ -7,7 +7,52 @@ SDK for HTTP and gRPC services.
 Specify `HOSTNAME` environment variable on your local machine to distinguish your local logs from the rest of the logs in the centralized Seq instance.
 If `HOSTNAME` is empty, OS user name will be used instead.
 
-Spcify `SeqUrl` with [Seq](https://datalust.co/seq) url in the json settings or in the environment variables to forward logs to the Seq.
+Specify `SeqUrl` with [Seq](https://datalust.co/seq) url in the json settings or in the environment variables to forward logs to the Seq.
+
+Specify `ConsoleOutputLogLevel` with `Error` or `Warning` in the json settings or in the environment variables to disable standart output in console.
+
+Specify `ElasticsearchLogs.IndexPrefixName` with the index name preffix in the json settings or in the environment variables to use specific index name Elasticsearch. By default IndexPrefixName = `log`.
+
+Specify `ElasticsearchLogs.NodeUrls` with the URL addresses of Elasticsearch nodes in the json settings or in the environment variables to write logs to Elasticsearch.
+```
+{
+	"ElasticsearchLogs": {
+		"NodeUrls": ["http://elasticsearch-1.elk-logs:9200", "http://elasticsearch-2.elk-logs:9200", "http://elasticsearch-3.elk-logs:9200"],
+		"IndexPrefixName": "logs"
+	}
+}
+```
+```
+ElasticsearchLogs__NodeUrls__1 = "http://elasticsearch-1.elk-logs:9200"
+ElasticsearchLogs__NodeUrls__2 = "http://elasticsearch-2.elk-logs:9200"
+ElasticsearchLogs__NodeUrls__3 = "http://elasticsearch-3.elk-logs:9200"
+```
+
+Specify `Serilog.minimumLevel` with [Serilog](https://github.com/serilog/serilog-settings-configuration) config in the json settings or in the environment variables to manage log level.
+```
+{
+	"Serilog": {
+		"minimumLevel": {
+			"default": "Information",
+			"override": {
+				"Microsoft": "Warning",
+				"System": "Warning"
+			}
+		}
+	  }
+}
+```
+
+`Verbose`:	Verbose is the noisiest level, rarely (if ever) enabled for a production app.
+`Debug`:	Debug is used for internal system events that are not necessarily observable from the outside, but useful when determining how something happened.
+`Information`:	Information events describe things happening in the system that correspond to its responsibilities and functions. Generally these are the observable actions the system can perform.
+`Warning`:	When service is degraded, endangered, or may be behaving outside of its expected parameters, Warning level events are used.
+`Error`:	When functionality is unavailable or expectations broken, an Error event is used.
+`Fatal`:	The most critical level, Fatal events demand immediate attention.
+
+
+
+
 
 ## Auth
 
