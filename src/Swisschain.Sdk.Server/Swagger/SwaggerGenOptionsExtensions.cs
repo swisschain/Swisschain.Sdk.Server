@@ -26,6 +26,11 @@ namespace Swisschain.Sdk.Server.Swagger
             swaggerOptions.SchemaFilter<ResponseValueTypesRequiredSchemaFilter>();
         }
 
+        public static void AddModelStateDictionaryResponse(this SwaggerGenOptions swaggerOptions, int statusCode)
+        {
+            swaggerOptions.SwaggerGeneratorOptions.OperationFilters.Add(new ModelStateDictionaryErrorResponseSwaggerOperationFilter(statusCode));
+        }
+
         public static void AddJwtBearerAuthorization(this SwaggerGenOptions swaggerOptions)
         {
             swaggerOptions.SwaggerGeneratorOptions.OperationFilters.Add(new AuthorizationCheckSwaggerOperationFilter());

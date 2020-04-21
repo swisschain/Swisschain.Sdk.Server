@@ -22,7 +22,8 @@ namespace Swisschain.Sdk.Server.Logging
                 .ReadFrom.Configuration(configRoot)
                 .Enrich.FromLogContext()
                 .Enrich.WithExceptionData()
-                .Enrich.WithCorrelationIdHeader();
+                .Enrich.WithCorrelationIdHeader()
+                .Enrich.WithRequestIdHeader();
 
             SetupProperty(productName, config);
 

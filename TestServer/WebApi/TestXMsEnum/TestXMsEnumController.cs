@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 
 namespace TestServer.WebApi.TestXMsEnum
 {
@@ -8,6 +9,8 @@ namespace TestServer.WebApi.TestXMsEnum
         [HttpPost("{value}")]
         public AResponse Test([FromRoute] AEnum value, [FromQuery] AEnum queryStringValue, [FromBody] ARequest request)
         {
+            throw new InvalidOperationException("123");
+
             return new AResponse();
         }
     }
