@@ -82,7 +82,16 @@ namespace Swisschain.Sdk.Server.Logging
         private static void SetupConsole(IConfigurationRoot configRoot, LoggerConfiguration config)
         {
             var disableConsole = configRoot["disableConsoleLogOutput"];
-            if (disableConsole?.ToLower() != "false")
+            if (disableConsole?.ToLower() == "true")
+            {
+                var color = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Log output to console is disabled.");
+                Console.ForegroundColor = color;
+                Console.WriteLine(
+                    "To enable output please change setting 'disableConsoleLogOutput' to 'false' (see config or environment variables)");
+            }
+            else
             {
                 var color = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -92,15 +101,6 @@ namespace Swisschain.Sdk.Server.Logging
                     "To disable output please change setting 'disableConsoleLogOutput' to 'true' (see config or environment variables)");
 
                 config.WriteTo.Console();
-            }
-            else
-            {
-                var color = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Log output to console is disabled.");
-                Console.ForegroundColor = color;
-                Console.WriteLine(
-                    "To enable output please change setting 'disableConsoleLogOutput' to 'false' (see config or environment variables)");
             }
         }
 
@@ -121,8 +121,8 @@ namespace Swisschain.Sdk.Server.Logging
 
             if (elasticsearchUrlsConfig?.NodeUrls != null && elasticsearchUrlsConfig.NodeUrls.Any())
             {
-                var indexPrefix = elasticsearchUrlsConfig?.IndexPrefixName ?? "logs";
-
+                var indexPrefix = elasticsearchUrlsConfig?.IndexPrefixName ?? "log";
+                
                 config.WriteTo.Elasticsearch(
                     new ElasticsearchSinkOptions(elasticsearchUrlsConfig.NodeUrls.Select(u => new Uri(u)))
                     {
@@ -130,6 +130,8 @@ namespace Swisschain.Sdk.Server.Logging
                         AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv6,
                         IndexDecider = (e, o) => $"{indexPrefix}-{o.Date:yyyy-MM-dd}",
                     });
+
+                Console.WriteLine($"Setup logging to Elasticsearch. Index name: {indexPrefix}-yyyy-MM-dd");
             }
         }
 

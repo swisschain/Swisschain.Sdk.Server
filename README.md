@@ -11,11 +11,14 @@ Specify `SeqUrl` with [Seq](https://datalust.co/seq) url in the json settings or
 
 Specify `DisableConsoleLogOutput` with `false` in the json settings or in the environment variables to disable output in console.
 
+Specify `ElasticsearchLogs.IndexPrefixName` with the index name preffix in the json settings or in the environment variables to use specific index name Elasticsearch. By default IndexPrefixName = `log`.
+
 Specify `ElasticsearchLogs.NodeUrls` with the URL addresses of Elasticsearch nodes in the json settings or in the environment variables to write logs to Elasticsearch.
 ```
 {
 	"ElasticsearchLogs": {
-		"NodeUrls": ["http://elasticsearch-1.elk-logs:9200", "http://elasticsearch-2.elk-logs:9200", "http://elasticsearch-3.elk-logs:9200"]
+		"NodeUrls": ["http://elasticsearch-1.elk-logs:9200", "http://elasticsearch-2.elk-logs:9200", "http://elasticsearch-3.elk-logs:9200"],
+		"IndexPrefixName": "logs"
 	}
 }
 ```
@@ -46,6 +49,8 @@ Specify `Serilog.minimumLevel` with [Serilog](https://github.com/serilog/serilog
 `Warning`:	When service is degraded, endangered, or may be behaving outside of its expected parameters, Warning level events are used.
 `Error`:	When functionality is unavailable or expectations broken, an Error event is used.
 `Fatal`:	The most critical level, Fatal events demand immediate attention.
+
+
 
 
 
