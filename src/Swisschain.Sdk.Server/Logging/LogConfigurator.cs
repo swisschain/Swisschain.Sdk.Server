@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
 using Swisschain.Sdk.Server.Common;
 using Swisschain.Sdk.Server.Configuration.WebJsonSettings;
@@ -81,24 +82,26 @@ namespace Swisschain.Sdk.Server.Logging
 
         private static void SetupConsole(IConfigurationRoot configRoot, LoggerConfiguration config)
         {
-            var disableConsole = configRoot["disableConsoleLogOutput"];
-            if (disableConsole?.ToLower() == "true")
+            var loglevel = configRoot["ConsoleOutputLogLevel"];
+
+            if (!string.IsNullOrEmpty(loglevel) && Enum.TryParse<LogEventLevel>(loglevel, out var restrictedToMinimumLevel))
             {
                 var color = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Log output to console is disabled.");
+                Console.WriteLine($"Standard log output to console is disabled. Set minimum level = {loglevel}");
                 Console.ForegroundColor = color;
                 Console.WriteLine(
-                    "To enable output please change setting 'disableConsoleLogOutput' to 'false' (see config or environment variables)");
+                    "To enable Standard output please remove (or set to null) setting 'ConsoleOutputLogLevel' (see config or environment variables)");
+                config.WriteTo.Console(restrictedToMinimumLevel);
             }
             else
             {
                 var color = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Log output to console is enabled.");
+                Console.WriteLine("Standard log output to console is enabled.");
                 Console.ForegroundColor = color;
                 Console.WriteLine(
-                    "To disable output please change setting 'disableConsoleLogOutput' to 'true' (see config or environment variables)");
+                    "To disable standard output please add setting 'ConsoleOutputLogLevel' with 'Error' or 'Warning' min log level (see config or environment variables)");
 
                 config.WriteTo.Console();
             }

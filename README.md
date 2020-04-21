@@ -9,7 +9,7 @@ If `HOSTNAME` is empty, OS user name will be used instead.
 
 Specify `SeqUrl` with [Seq](https://datalust.co/seq) url in the json settings or in the environment variables to forward logs to the Seq.
 
-Specify `DisableConsoleLogOutput` with `false` in the json settings or in the environment variables to disable output in console.
+Specify `ConsoleOutputLogLevel` with `Error` or `Warning` in the json settings or in the environment variables to disable standart output in console.
 
 Specify `ElasticsearchLogs.IndexPrefixName` with the index name preffix in the json settings or in the environment variables to use specific index name Elasticsearch. By default IndexPrefixName = `log`.
 
