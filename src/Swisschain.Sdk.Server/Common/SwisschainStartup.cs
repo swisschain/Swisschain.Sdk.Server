@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using Autofac;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
@@ -16,6 +18,7 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swisschain.Sdk.Server.Swagger;
+using Swisschain.Sdk.Server.WebApi.ExceptionsHandling;
 
 namespace Swisschain.Sdk.Server.Common
 {
@@ -25,22 +28,38 @@ namespace Swisschain.Sdk.Server.Common
         private bool _useJwtAuth;
         private string _jwtSecret;
         private string _jwtAudience;
-
+        
         public SwisschainStartup(IConfiguration configRoot)
         {
             ConfigRoot = configRoot;
             Config = ConfigRoot.Get<TAppSettings>();
+            ExceptionHandlingMiddlewares = new List<(System.Type, object[])>();
+            ModelStateDictionaryResponseCodes = new HashSet<int>();
+
+            AddExceptionHandlingMiddleware<UnhandledExceptionsMiddleware>();
+
+            ModelStateDictionaryResponseCodes.Add(StatusCodes.Status400BadRequest);
+            ModelStateDictionaryResponseCodes.Add(StatusCodes.Status500InternalServerError);
         }
 
         public IConfiguration ConfigRoot { get; }
 
         public TAppSettings Config { get; }
 
+        public List<(System.Type Type, object[] Args)> ExceptionHandlingMiddlewares { get; }
+        
+        public ISet<int> ModelStateDictionaryResponseCodes { get; }
+
         protected void AddJwtAuth(string secret, string audience)
         {
             _useJwtAuth = true;
             _jwtSecret = secret;
             _jwtAudience = audience;
+        }
+
+        protected void AddExceptionHandlingMiddleware<TMiddleware>(params object[] args)
+        {
+            ExceptionHandlingMiddlewares.Add((typeof(TMiddleware), args));
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -73,6 +92,11 @@ namespace Swisschain.Sdk.Server.Common
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = ApplicationInformation.AppName, Version = "v1" });
                 c.EnableXmsEnumExtension();
                 c.MakeResponseValueTypesRequired();
+
+                foreach (var code in ModelStateDictionaryResponseCodes)
+                {
+                    c.AddModelStateDictionaryResponse(code);
+                }
 
                 if (_useJwtAuth)
                 {
@@ -133,7 +157,10 @@ namespace Swisschain.Sdk.Server.Common
                 app.UseDeveloperExceptionPage();
             }
 
-            ConfigureMiddleware(app, env);
+            foreach (var (type, args) in ExceptionHandlingMiddlewares)
+            {
+                app.UseMiddleware(type, args);
+            }
 
             app.UseRouting();
 
@@ -186,10 +213,6 @@ namespace Swisschain.Sdk.Server.Common
         }
 
         protected virtual void ConfigureControllers(MvcOptions options)
-        {
-        }
-
-        protected virtual void ConfigureMiddleware(IApplicationBuilder app, IWebHostEnvironment env)
         {
         }
     }

@@ -21,7 +21,7 @@ namespace TestServer
 
             using var loggerFactory = LogConfigurator.Configure(
                 "Sdk",
-                remoteSettingsUrlsConfig.RemoteSettingsUrls);
+                remoteSettingsUrlsConfig.RemoteSettingsUrls ?? Array.Empty<string>());
 
             var logger = loggerFactory.CreateLogger<Program>();
 
@@ -44,7 +44,7 @@ namespace TestServer
                 .SwisschainService<Startup>(options =>
                 {
                     options.UseLoggerFactory(loggerFactory);
-                    options.AddWebJsonConfigurationSources(remoteSettingsUrlsConfig.RemoteSettingsUrls);
+                    options.AddWebJsonConfigurationSources(remoteSettingsUrlsConfig.RemoteSettingsUrls ?? Array.Empty<string>());
                 });
     }
 }
