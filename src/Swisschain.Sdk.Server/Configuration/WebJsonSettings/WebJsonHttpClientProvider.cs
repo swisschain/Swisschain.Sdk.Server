@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Net.Http;
+using Microsoft.Extensions.Configuration;
+using Swisschain.Sdk.Server.Common;
 
 namespace Swisschain.Sdk.Server.Configuration.WebJsonSettings
 {
@@ -9,9 +11,13 @@ namespace Swisschain.Sdk.Server.Configuration.WebJsonSettings
 
         static WebJsonHttpClientProvider()
         {
+            var timeout = ApplicationEnvironment.Config.GetValue("RemoteSettingsReadTimeout", TimeSpan.FromSeconds(5));
+
+            Console.WriteLine($"Env - RemoteSettingsReadTimeout: {timeout}");
+
             DefaultClient = new HttpClient
             {
-                Timeout = TimeSpan.FromSeconds(5)
+                Timeout = timeout
             };
         }
     }

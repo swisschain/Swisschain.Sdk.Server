@@ -11,6 +11,10 @@ Specify `SeqUrl` with [Seq](https://datalust.co/seq) url in the json settings or
 
 Specify `ConsoleOutputLogLevel` with `Error` or `Warning` in the json settings or in the environment variables to disable standart output in console.
 
+Specify `RemoteSettingsReadTimeout` as a [TimeSpan](https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-timespan-format-strings) to override default remote settings reading time-out. Default timeout is 5 seconds.
+
+Specify `RemoteSettingsRequired` with `true` to make remote settings mandatory. By default the remote settings are optional.
+
 Specify `ElasticsearchLogs.IndexPrefixName` with the index name preffix in the json settings or in the environment variables to use specific index name Elasticsearch. By default IndexPrefixName = `log`.
 
 Specify `ElasticsearchLogs.NodeUrls` with the URL addresses of Elasticsearch nodes in the json settings or in the environment variables to write logs to Elasticsearch.

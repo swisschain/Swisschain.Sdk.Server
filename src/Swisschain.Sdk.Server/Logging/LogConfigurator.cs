@@ -16,6 +16,9 @@ namespace Swisschain.Sdk.Server.Logging
         public static ILoggerFactory Configure(string productName = default,
             IReadOnlyCollection<string> remoteSettingsUrls = default)
         {
+            Console.WriteLine($"App - name: {ApplicationInformation.AppName}");
+            Console.WriteLine($"App - version: {ApplicationInformation.AppVersion}");
+
             IConfigurationRoot configRoot = BuildConfigRoot(remoteSettingsUrls);
 
             var config = new LoggerConfiguration()
@@ -48,12 +51,16 @@ namespace Swisschain.Sdk.Server.Logging
         {
             var configBuilder = new ConfigurationBuilder();
 
+            var isRemoteSettingsRequired = ApplicationEnvironment.Config.GetValue("RemoteSettingsRequired", false);
+
+            Console.WriteLine($"Env - RemoteSettingsRequired: {isRemoteSettingsRequired}");
+
             if (remoteSettingsUrls != null)
             {
                 foreach (var remoteSettingsUrl in remoteSettingsUrls)
                 {
                     configBuilder.AddWebJsonConfiguration(WebJsonHttpClientProvider.DefaultClient, remoteSettingsUrl,
-                        isOptional: true);
+                        isOptional: !isRemoteSettingsRequired);
                 }
             }
 
@@ -83,26 +90,23 @@ namespace Swisschain.Sdk.Server.Logging
 
         private static void SetupConsole(IConfigurationRoot configRoot, LoggerConfiguration config)
         {
-            var loglevel = configRoot["ConsoleOutputLogLevel"];
+            var logLevel = configRoot["ConsoleOutputLogLevel"];
 
-            if (!string.IsNullOrEmpty(loglevel) && Enum.TryParse<LogEventLevel>(loglevel, out var restrictedToMinimumLevel))
+            if (!string.IsNullOrEmpty(logLevel) && Enum.TryParse<LogEventLevel>(logLevel, out var restrictedToMinimumLevel))
             {
                 var color = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Standard log output to console is disabled. Set minimum level = {loglevel}");
+                Console.WriteLine($"Env - ConsoleOutputLogLevel: {restrictedToMinimumLevel}");
                 Console.ForegroundColor = color;
-                Console.WriteLine(
-                    "To enable Standard output please remove (or set to null) setting 'ConsoleOutputLogLevel' (see config or environment variables)");
+
                 config.WriteTo.Console(restrictedToMinimumLevel);
             }
             else
             {
                 var color = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Standard log output to console is enabled.");
+                Console.WriteLine("Env - ConsoleOutputLogLevel: <not specified> (default)");
                 Console.ForegroundColor = color;
-                Console.WriteLine(
-                    "To disable standard output please add setting 'ConsoleOutputLogLevel' with 'Error' or 'Warning' min log level (see config or environment variables)");
 
                 config.WriteTo.Console();
             }
