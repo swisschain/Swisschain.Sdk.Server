@@ -11,7 +11,16 @@ namespace Swisschain.Sdk.Server.Authorization
                 .SelectMany(x => x.Claims)
                 .Where(c => c.Type == "tenant-id")
                 .Select(x => x.Value)
-                .SingleOrDefault();
+                .Single();
+        }
+
+        public static string GetUserId(this ClaimsPrincipal user)
+        {
+            return user.Identities
+                .SelectMany(x => x.Claims)
+                .Where(c => c.Type == "user-id")
+                .Select(x => x.Value)
+                .Single();
         }
     }
 }
