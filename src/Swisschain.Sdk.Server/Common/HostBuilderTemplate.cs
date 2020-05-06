@@ -52,6 +52,9 @@ namespace Swisschain.Sdk.Server.Common
                     webBuilder.UseStartup<TStartup>();
                     webBuilder.ConfigureKestrel(options =>
                     {
+                        Console.WriteLine($"Options - HttpPort: {optionsBuilder.HttpPort}");
+                        Console.WriteLine($"Options - GrpcPort: {optionsBuilder.GrpcPort}");
+
                         options.Listen(IPAddress.Any, optionsBuilder.HttpPort, listenOptions =>
                         {
                             listenOptions.Protocols = HttpProtocols.Http1;
