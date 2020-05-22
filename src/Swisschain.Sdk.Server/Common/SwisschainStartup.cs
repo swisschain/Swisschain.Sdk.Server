@@ -142,6 +142,8 @@ namespace Swisschain.Sdk.Server.Common
                     });
             }
 
+            services.AddGrpcReflection();
+
             ConfigureServicesExt(services);
         }
 
@@ -174,6 +176,8 @@ namespace Swisschain.Sdk.Server.Common
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+
+                endpoints.MapGrpcReflectionService();
 
                 RegisterEndpoints(endpoints);
             });
