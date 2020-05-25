@@ -2,6 +2,8 @@
 
 SDK for HTTP and gRPC services.
 
+[![nuget](https://img.shields.io/nuget/v/Swisschain.Sdk.Server?color=green&label=nuget%3A%20Swisschain.Sdk.Server)](https://www.nuget.org/packages/Swisschain.Sdk.Server/)
+
 ## Logging
 
 Specify `HOSTNAME` environment variable on your local machine to distinguish your local logs from the rest of the logs in the centralized Seq instance.
