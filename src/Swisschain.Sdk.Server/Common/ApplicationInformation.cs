@@ -9,17 +9,20 @@ namespace Swisschain.Sdk.Server.Common
         static ApplicationInformation()
         {
             StartedAt = DateTime.UtcNow;
-            
+
             var name = Assembly.GetEntryAssembly()?.GetName();
-            
-            var nameSegments = (name?.Name ?? string.Empty).Split('.', StringSplitOptions.RemoveEmptyEntries);
+
+            string appName = name?.Name ?? string.Empty;
+
+            var nameSegments = appName.Split('.', StringSplitOptions.RemoveEmptyEntries);
 
             if (nameSegments.Length > 2)
             {
-                AppName = string.Join('.', nameSegments.Skip(1));
+                appName = string.Join('.', nameSegments.Skip(1));
             }
 
-            AppVersion = name?.Version.ToString();
+            AppName = appName;
+            AppVersion = name?.Version?.ToString();
         }
 
         public static DateTime StartedAt { get; }
