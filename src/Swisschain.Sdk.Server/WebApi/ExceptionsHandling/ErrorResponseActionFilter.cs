@@ -14,10 +14,10 @@ namespace Swisschain.Sdk.Server.WebApi.ExceptionsHandling
         {
             if (context.Result is IStatusCodeActionResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode < 200 ||
-                    statusCodeResult.StatusCode >= 300)
+                if (statusCodeResult.StatusCode != null &&
+                    (statusCodeResult.StatusCode < 200 || statusCodeResult.StatusCode >= 300))
                 {
-                    context.Result = CreateValidationResult(context.ModelState, context.HttpContext.Response.StatusCode);
+                    context.Result = CreateValidationResult(context.ModelState, statusCodeResult.StatusCode.Value);
                 }
             }
         }
@@ -53,6 +53,11 @@ namespace Swisschain.Sdk.Server.WebApi.ExceptionsHandling
 
         private static string FormatFieldName(string fieldName)
         {
+            if (string.IsNullOrEmpty(fieldName))
+            {
+                return fieldName;
+            }
+
             // Keeps kebab-case field names as is
             if (fieldName.IndexOf('-') != -1)
             {
@@ -60,12 +65,12 @@ namespace Swisschain.Sdk.Server.WebApi.ExceptionsHandling
             }
 
             // Converts PascalCase field names to the camelCase
-            if (!string.IsNullOrEmpty(fieldName) && fieldName.Length > 1)
+            if (fieldName.Length > 1)
             {
                 return char.ToLowerInvariant(fieldName[0]) + fieldName.Substring(1);
             }
 
-            return fieldName?.ToLowerInvariant();
+            return fieldName.ToLowerInvariant();
         }
     }
 }
