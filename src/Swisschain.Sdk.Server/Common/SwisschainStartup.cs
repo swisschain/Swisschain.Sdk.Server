@@ -68,6 +68,7 @@ namespace Swisschain.Sdk.Server.Common
                 .AddControllers(options =>
                 {
                     options.Filters.Add(new ProducesAttribute("application/json"));
+                    options.Filters.Add<ErrorResponseActionFilter>();
 
                     ConfigureControllers(options);
                 })
@@ -86,6 +87,12 @@ namespace Swisschain.Sdk.Server.Common
                         NamingStrategy = namingStrategy
                     };
                 });
+
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                // ErrorResponseActionFilter manages model validation
+                options.SuppressModelStateInvalidFilter = true;
+            });
 
             services.AddSwaggerGen(c =>
             {
