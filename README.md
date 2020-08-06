@@ -69,7 +69,7 @@ For all unhandled exceptions, not-succesfull (x < 200 and x >= 300) HTTP status 
         "requestField": [
             "Error related to the particular requestField"
         ]
-	}
+    }
 }
 ```
 
