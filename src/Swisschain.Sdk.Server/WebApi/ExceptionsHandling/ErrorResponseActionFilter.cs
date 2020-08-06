@@ -32,19 +32,24 @@ namespace Swisschain.Sdk.Server.WebApi.ExceptionsHandling
 
         private static IActionResult CreateValidationResult(ModelStateDictionary modelState, int statusCode)
         {
+            var messages = modelState
+                .Select(x => new
+                {
+                    Key = FormatFieldName(x.Key),
+                    Messages = x.Value.Errors
+                        .Select(e => e.ErrorMessage ?? e.Exception?.Message)
+                        .Where(m => m != null)
+                        .ToArray()
+                })
+                .Where(x => x.Messages.Any())
+                .ToArray();
+
             var resultObject = new
             {
-                errors = modelState.Count != 0
-                    ? modelState
-                        .Select(x => new
-                        {
-                            Key = FormatFieldName(x.Key),
-                            Messages = x.Value.Errors.Select(e => e.ErrorMessage).ToArray()
-                        })
-                        .Where(x => x.Messages.Any())
-                        .ToDictionary(
-                            x => x.Key,
-                            x => x.Messages)
+                errors = messages.Any()
+                    ? messages.ToDictionary(
+                        x => x.Key,
+                        x => x.Messages)
                     : new Dictionary<string, string[]> {{"", new[] {"Unknown error"}}}
             };
 

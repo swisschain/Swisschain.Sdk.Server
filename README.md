@@ -56,9 +56,29 @@ Specify `Serilog.minimumLevel` with [Serilog](https://github.com/serilog/serilog
 `Error`:	When functionality is unavailable or expectations broken, an Error event is used.
 `Fatal`:	The most critical level, Fatal events demand immediate attention.
 
+## Error response
 
+For all unhandled exceptions, not-succesfull (x < 200 and x >= 300) HTTP status codes, and request validation violations SDK produces a error response like:
 
+```json 
+{
+    "errors": {
+        "": [
+            "Summary error message"
+        ],
+        "requestField": [
+            "Error related to the particular requestField"
+        ]
+	}
+}
+```
 
+There is action filter `ErrorResponseActionFilter` and middlware `UnhandledExceptionsMiddleware` which handles this. Bseides error response formatting `ErrorResponseActionFilter` validates
+request model so you don't need to do `if(!ModelState.IsValid) return BadRequest(ModelState);` in each action. 
+
+For the not-successfull HTTP status codes error response is formatted from the `ModelState` so, all you need to response an error is fill `ModelState` using `ModelState.AddModelError()`.
+Since `ErrorResponseActionFilter` overrides error response returned from a controller action, it is not needed to pass `ModelState` to `BadRequest()`, `NotFound()` and other methods which 
+return `IActionResult` - just fill `ModelState` and return not-successful HTTP status code from the action.
 
 ## Auth
 
