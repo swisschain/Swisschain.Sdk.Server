@@ -8,7 +8,7 @@ using Swisschain.Extensions.Grpc.Abstractions;
 
 namespace Swisschain.Sdk.Server.Grpc.Streaming
 {
-    public class StreamServiceBase<TStreamItemCollection, TStreamItem, TStreamItemId> : IDisposable
+    public abstract class StreamServiceBase<TStreamItemCollection, TStreamItem, TStreamItemId> : IDisposable
         where TStreamItemCollection : class, IStreamItemCollection<TStreamItem, TStreamItemId>
         where TStreamItemId : IComparable<TStreamItemId>, IComparable
         where TStreamItem : IStreamItem<TStreamItemId>
