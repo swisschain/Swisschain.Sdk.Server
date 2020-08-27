@@ -28,6 +28,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="5.5.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.5.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="5.5.1" />
+    <PackageReference Include="Swisschain.Extensions.Grpc.Abstractions" Version="2.0.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.7.1" />
     <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.30.0" />
   </ItemGroup>

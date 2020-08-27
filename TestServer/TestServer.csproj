@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Swisschain.Extensions.Grpc.Abstractions" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\src\Swisschain.Sdk.Server\Swisschain.Sdk.Server.csproj" />
   </ItemGroup>
 
