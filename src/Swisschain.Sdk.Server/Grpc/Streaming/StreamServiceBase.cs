@@ -148,11 +148,6 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
 
         public void Dispose()
         {
-            Stop();
-        }
-
-        public void Stop()
-        {
             _readerWriterLock.AcquireWriterLock(Timeout.Infinite);
 
             try

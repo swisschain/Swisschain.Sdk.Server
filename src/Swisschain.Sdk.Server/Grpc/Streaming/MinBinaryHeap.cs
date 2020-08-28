@@ -3,7 +3,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Swisschain.Extensions.Grpc.Abstractions;
 
-[assembly: InternalsVisibleTo("Swisschain.Sdk.Server.Test")]
 namespace Swisschain.Sdk.Server.Grpc.Streaming
 {
     internal class MinBinaryHeap<TStreamItemCollection, TStreamItem, TStreamItemId>
