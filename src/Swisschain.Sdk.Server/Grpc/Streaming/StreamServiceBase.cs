@@ -200,10 +200,12 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             {
                 var processedData = ProcessDataBeforeSend(data, streamData);
                 //Skip already processed messages
-                if (!data.StreamItems.Any() ||
-                    data.StreamItems.All(y => y.StreamItemId.CompareTo(streamData.Cursor) < 0))
+                if (!data.StreamItems.Any())
+                    await streamData.Stream.WriteAsync(processedData);
+
+                if (data.StreamItems.All(y => y.StreamItemId.CompareTo(streamData.Cursor) < 0))
                 {
-                    _logger.LogWarning("StreamService<{typeof(TStreamItemCollection).Name}> Skipped message during streaming {@context}",
+                    _logger.LogWarning("Skipped message during streaming {@context}",
                         new
                         {
                             Peer = streamData.Peer,

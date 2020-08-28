@@ -11,7 +11,7 @@ namespace Swisschain.Sdk.Server.Test
     public class StreamServiceBaseTests
     {
         [Fact]
-        public async Task PingTest()
+        public async Task PingAfterHistoricalSentTest()
         {
             var loggerFactory = new LoggerFactory();
             var streamService = new StreamServiceExample(loggerFactory.CreateLogger("StreamServiceBaseTests"), true, 1_000);
@@ -39,6 +39,36 @@ namespace Swisschain.Sdk.Server.Test
             
             var delayTask = Task.Delay(TimeSpan.FromSeconds(5));
             var firstCompleted = Task.WaitAny(new Task[] {delayTask, completionTask});
+
+            Assert.Equal(0, firstCompleted);
+
+            Assert.True(serverStreamWriter.Messages.Count >= 2);
+
+            streamData.Dispose();
+            serverStreamWriter.Dispose();
+        }
+
+        [Fact]
+        public async Task PingBeforeHistoricalSentTest()
+        {
+            var loggerFactory = new LoggerFactory();
+            var streamService = new StreamServiceExample(loggerFactory.CreateLogger("StreamServiceBaseTests"), true, 1_000);
+            var cts = new CancellationTokenSource();
+            var serverStreamWriter = new ServerStreamWriterFake();
+            var streamInfo = new StreamInfo<StreamItemCollection>()
+            {
+                CancelationToken = cts.Token,
+                Keys = new[] { "tenantId" },
+                Peer = "127.0.0.1:5000",
+                Stream = serverStreamWriter
+            };
+
+            var streamData = streamService.RegisterStream(streamInfo, new Filter());
+            var completionTask = streamData.GetCompletionTask();
+            streamService.SwitchToReady(streamData);
+
+            var delayTask = Task.Delay(TimeSpan.FromSeconds(5));
+            var firstCompleted = Task.WaitAny(new Task[] { delayTask, completionTask });
 
             Assert.Equal(0, firstCompleted);
 
