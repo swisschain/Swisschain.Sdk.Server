@@ -17,7 +17,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
         private readonly Timer _checkTimer;
         private readonly Timer _pingTimer;
 
-        private readonly ReaderWriterLockSlim _readerWriterLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+        private readonly ReaderWriterLockSlim _readerWriterLock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         private readonly List<StreamData<TStreamItemCollection, TStreamItem, TStreamItemId>> _streamList =
             new List<StreamData<TStreamItemCollection, TStreamItem, TStreamItemId>>();
 
