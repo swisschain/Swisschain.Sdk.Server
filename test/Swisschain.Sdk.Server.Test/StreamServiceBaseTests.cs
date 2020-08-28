@@ -44,7 +44,7 @@ namespace Swisschain.Sdk.Server.Test
 
             Assert.True(serverStreamWriter.Messages.Count >= 2);
 
-            streamData.Dispose();
+            streamService.Dispose();
             serverStreamWriter.Dispose();
         }
 
@@ -74,7 +74,7 @@ namespace Swisschain.Sdk.Server.Test
 
             Assert.True(serverStreamWriter.Messages.Count >= 2);
 
-            streamData.Dispose();
+            streamService.Dispose();
             serverStreamWriter.Dispose();
         }
 
@@ -155,7 +155,7 @@ namespace Swisschain.Sdk.Server.Test
 
             Assert.True(serverStreamWriter.Messages.Count == 21);
 
-            streamData.Dispose();
+            streamService.Dispose();
             serverStreamWriter.Dispose();
         }
 
@@ -163,7 +163,7 @@ namespace Swisschain.Sdk.Server.Test
         public async Task WriteToActualManyThreadsTest()
         {
             var loggerFactory = new LoggerFactory();
-            var streamService = new StreamServiceExample(loggerFactory.CreateLogger("StreamServiceBaseTests"), true, 10);
+            var streamService = new StreamServiceExample(loggerFactory.CreateLogger("StreamServiceBaseTests"), true, 100);
             var cts = new CancellationTokenSource();
             var serverStreamWriter = new ServerStreamWriterFake();
             var streamInfo = new StreamInfo<StreamItemCollection>()
@@ -182,7 +182,7 @@ namespace Swisschain.Sdk.Server.Test
 
             var task1 = Task.Run(() =>
             {
-                for (int i = 0; i < 680; i++)
+                for (int i = 0; i < 68; i++)
                 {
                     streamService.WriteToStreamActual(new StreamItemCollection(new StreamItem[]
                     {
@@ -196,7 +196,7 @@ namespace Swisschain.Sdk.Server.Test
 
             var task2 = Task.Run(() =>
             {
-                for (int i = 0; i < 680; i++)
+                for (int i = 0; i < 68; i++)
                 {
                     streamService.WriteToStreamActual(new StreamItemCollection(new StreamItem[]
                     {
@@ -213,8 +213,9 @@ namespace Swisschain.Sdk.Server.Test
             var firstCompleted = Task.WaitAny(new Task[] { completionTask, tcs.Task, timeoutTask });
 
 
-            Assert.True(serverStreamWriter.Messages.Count >= 679);
-            streamData.Dispose();
+            Assert.True(serverStreamWriter.Messages.Count >= 67);
+
+            streamService.Dispose();
             serverStreamWriter.Dispose();
         }
     }

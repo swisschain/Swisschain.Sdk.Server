@@ -152,6 +152,10 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
 
             try
             {
+                _cancellationTokenSource.Cancel();
+                _checkTimer.Dispose();
+                _pingTimer?.Dispose();
+
                 foreach (var streamInfo in _streamList)
                 {
                     streamInfo.CompletionTask.TrySetResult(1);
@@ -164,10 +168,6 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             {
                 _readerWriterLock.ReleaseWriterLock();
             }
-
-            _cancellationTokenSource.Cancel();
-            _checkTimer.Dispose();
-            _pingTimer?.Dispose();
         }
 
         private void RemoveStream(StreamData<TStreamItemCollection, TStreamItem, TStreamItemId> streamData)
