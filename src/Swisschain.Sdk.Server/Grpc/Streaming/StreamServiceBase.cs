@@ -173,7 +173,6 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             _cancellationTokenSource.Cancel();
             _checkTimer.Dispose();
             _pingTimer?.Dispose();
-            _readerWriterLock.ReleaseLock();
         }
 
         private void RemoveStream(StreamData<TStreamItemCollection, TStreamItem, TStreamItemId> streamData)
