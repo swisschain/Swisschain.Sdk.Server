@@ -128,5 +128,62 @@ namespace Swisschain.Sdk.Server.Test
             streamData.Dispose();
             serverStreamWriter.Dispose();
         }
+
+        [Fact]
+        public async Task WriteToActualManyThreadsTest()
+        {
+            var loggerFactory = new LoggerFactory();
+            var streamService = new StreamServiceExample(loggerFactory.CreateLogger("StreamServiceBaseTests"), true, 10);
+            var cts = new CancellationTokenSource();
+            var serverStreamWriter = new ServerStreamWriterFake();
+            var streamInfo = new StreamInfo<StreamItemCollection>()
+            {
+                CancelationToken = cts.Token,
+                Keys = new[] { "tenantId" },
+                Peer = "127.0.0.1:5000",
+                Stream = serverStreamWriter
+            };
+
+            var streamData = streamService.RegisterStream(streamInfo, new Filter());
+            var tcs = new TaskCompletionSource<int>();
+            var completionTask = streamData.GetCompletionTask();
+
+            streamService.SwitchToReady(streamData);
+
+            var task1 = Task.Run(() =>
+            {
+                for (int i = 0; i < 680; i++)
+                {
+                    streamService.WriteToStreamActual(new StreamItemCollection(new StreamItem[]
+                    {
+                        new StreamItem()
+                        {
+                            StreamItemId = 14
+                        },
+                    }));
+                }
+            });
+
+            var task2 = Task.Run(() =>
+            {
+                for (int i = 0; i < 680; i++)
+                {
+                    streamService.WriteToStreamActual(new StreamItemCollection(new StreamItem[]
+                    {
+                        new StreamItem()
+                        {
+                            StreamItemId = 14
+                        },
+                    }));
+                }
+            });
+
+            await Task.WhenAll(task1, task2);
+            var timeoutTask = Task.Delay(TimeSpan.FromMilliseconds(10_000));
+            var firstCompleted = Task.WaitAny(new Task[] { completionTask, tcs.Task, timeoutTask });
+
+            streamData.Dispose();
+            serverStreamWriter.Dispose();
+        }
     }
 }
