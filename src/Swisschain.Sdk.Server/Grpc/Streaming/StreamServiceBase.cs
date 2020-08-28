@@ -23,7 +23,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
 
         private readonly CancellationTokenSource _cancellationTokenSource;
 
-        public StreamServiceBase(ILogger logger, bool needPing = false)
+        public StreamServiceBase(ILogger logger, bool needPing = false, int pingPeriodMs = 30_000)
         {
             _cancellationTokenSource = new CancellationTokenSource();
             _logger = logger;
@@ -42,7 +42,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
                 _pingTimer = new Timer(x =>
                 {
                     Ping().GetAwaiter().GetResult();
-                }, new object(), 0, 30_000);
+                }, new object(), 0, pingPeriodMs);
             }
         }
 
@@ -172,7 +172,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
 
             _cancellationTokenSource.Cancel();
             _checkTimer.Dispose();
-            _pingTimer.Dispose();
+            _pingTimer?.Dispose();
             _readerWriterLock.Dispose();
         }
 
@@ -258,6 +258,8 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
 
         private async Task Ping()
         {
+            _readerWriterLock.EnterReadLock();
+
             try
             {
                 foreach (var streamData in _streamList)
@@ -280,6 +282,10 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             catch (Exception e)
             {
                 _logger.LogWarning(e, $"StreamService<{typeof(TStreamItemCollection).Name}> Error happened during stream ping");
+            }
+            finally
+            {
+                _readerWriterLock.ExitReadLock();
             }
         }
     }
