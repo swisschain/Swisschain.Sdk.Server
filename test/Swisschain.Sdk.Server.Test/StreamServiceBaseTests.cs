@@ -158,7 +158,7 @@ namespace Swisschain.Sdk.Server.Test
                     {
                         new StreamItem()
                         {
-                            StreamItemId = 14
+                            StreamItemId = i
                         },
                     }));
                 }
@@ -172,7 +172,7 @@ namespace Swisschain.Sdk.Server.Test
                     {
                         new StreamItem()
                         {
-                            StreamItemId = 14
+                            StreamItemId = i
                         },
                     }));
                 }
@@ -182,6 +182,8 @@ namespace Swisschain.Sdk.Server.Test
             var timeoutTask = Task.Delay(TimeSpan.FromMilliseconds(10_000));
             var firstCompleted = Task.WaitAny(new Task[] { completionTask, tcs.Task, timeoutTask });
 
+
+            Assert.True(serverStreamWriter.Messages.Count >= 679);
             streamData.Dispose();
             serverStreamWriter.Dispose();
         }

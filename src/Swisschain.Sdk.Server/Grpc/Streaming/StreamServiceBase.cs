@@ -17,7 +17,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
         private readonly Timer _checkTimer;
         private readonly Timer _pingTimer;
 
-        private readonly ReaderWriterLockSlim _readerWriterLock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
+        private readonly ReaderWriterLock _readerWriterLock = new ReaderWriterLock();
         private readonly List<StreamData<TStreamItemCollection, TStreamItem, TStreamItemId>> _streamList =
             new List<StreamData<TStreamItemCollection, TStreamItem, TStreamItemId>>();
 
@@ -59,7 +59,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
         /// <returns></returns>
         public async Task WriteToStreamHistorical(TStreamItemCollection data)
         {
-            _readerWriterLock.EnterReadLock();
+            _readerWriterLock.AcquireReaderLock(Timeout.Infinite);
 
             try
             {
@@ -79,7 +79,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             }
             finally
             {
-                _readerWriterLock.ExitReadLock();
+                _readerWriterLock.ReleaseReaderLock();
             }
         }
 
@@ -95,7 +95,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
                 throw new ArgumentException("Data should contain only one element.", nameof(data));
             }
 
-            _readerWriterLock.EnterReadLock();
+            _readerWriterLock.AcquireReaderLock(Timeout.Infinite);
 
             try
             {
@@ -114,7 +114,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             }
             finally
             {
-                _readerWriterLock.ExitReadLock();
+                _readerWriterLock.ReleaseReaderLock();
             }
         }
 
@@ -127,7 +127,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
                 this._logger,
                 this.WriteToStream);
 
-            _readerWriterLock.EnterWriteLock();
+            _readerWriterLock.AcquireWriterLock(Timeout.Infinite);
 
             try
             {
@@ -135,7 +135,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             }
             finally
             {
-                _readerWriterLock.ExitWriteLock();
+                _readerWriterLock.ReleaseWriterLock();
             }
 
             return data;
@@ -153,7 +153,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
 
         public void Stop()
         {
-            _readerWriterLock.EnterWriteLock();
+            _readerWriterLock.AcquireWriterLock(Timeout.Infinite);
 
             try
             {
@@ -167,20 +167,20 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             }
             finally
             {
-                _readerWriterLock.ExitWriteLock();
+                _readerWriterLock.ReleaseWriterLock();
             }
 
             _cancellationTokenSource.Cancel();
             _checkTimer.Dispose();
             _pingTimer?.Dispose();
-            _readerWriterLock.Dispose();
+            _readerWriterLock.ReleaseLock();
         }
 
         private void RemoveStream(StreamData<TStreamItemCollection, TStreamItem, TStreamItemId> streamData)
         {
             streamData.CompletionTask.TrySetResult(1);
 
-            _readerWriterLock.EnterWriteLock();
+            _readerWriterLock.AcquireWriterLock(Timeout.Infinite);
 
             try
             {
@@ -188,7 +188,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             }
             finally
             {
-                _readerWriterLock.ExitWriteLock();
+                _readerWriterLock.ReleaseWriterLock();
             }
 
             _logger.LogDebug($"StreamService<{typeof(TStreamItemCollection).Name}> Remove stream connection (peer: {streamData.Peer})");
@@ -258,7 +258,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
 
         private async Task Ping()
         {
-            _readerWriterLock.EnterReadLock();
+            _readerWriterLock.AcquireReaderLock(Timeout.Infinite);
 
             try
             {
@@ -285,7 +285,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             }
             finally
             {
-                _readerWriterLock.ExitReadLock();
+                _readerWriterLock.ReleaseReaderLock();
             }
         }
     }

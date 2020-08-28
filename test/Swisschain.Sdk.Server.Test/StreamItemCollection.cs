@@ -5,6 +5,10 @@ namespace Swisschain.Sdk.Server.Test
 {
     public class StreamItemCollection : IStreamItemCollection<StreamItem, long>
     {
+        public StreamItemCollection()
+        {
+            this.StreamItems = new List<StreamItem>();
+        }
         public StreamItemCollection(IReadOnlyCollection<StreamItem> collection)
         {
             this.StreamItems = collection;
