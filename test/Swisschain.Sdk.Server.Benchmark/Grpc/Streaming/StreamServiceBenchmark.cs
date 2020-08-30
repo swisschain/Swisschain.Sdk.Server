@@ -13,14 +13,13 @@ namespace Swisschain.Sdk.Server.Benchmark.Grpc.Streaming
     [CsvMeasurementsExporter]
     [HtmlExporter]
     [PlainExporter]
-    //[RPlotExporter]
     [GcServer(true)]
     [ThreadingDiagnoser]
     [MemoryDiagnoser]
     public class StreamServiceBenchmark
     {
         private StreamServiceExample _streamService;
-        [Params(100, 1_000, 10_000)]
+        [Params(100, 1_000, 10_000, 100_000, 1_000_000)]
         public int _totalCount;
         private StreamItemCollection[] _arrayOfData;
         private StreamData<StreamItemCollection, StreamItem, long> _streamData;
