@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Core;
 
-namespace Swisschain.Sdk.Server.Test
+namespace Swisschain.Sdk.Server.Test.Common.Grpc.Streaming
 {
     public delegate void MessageReceived<TStreamItemCollection>(object sender, TStreamItemCollection e);
 

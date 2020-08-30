@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Swisschain.Sdk.Server.Grpc.Streaming;
+using Swisschain.Sdk.Server.Test.Common.Grpc.Streaming;
 using Xunit;
 
 namespace Swisschain.Sdk.Server.Test
