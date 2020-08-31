@@ -208,7 +208,7 @@ namespace Swisschain.Sdk.Server.Common
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         }
 
-        protected virtual void ConfigureMvcOptions(MvcOptions options)
+        private void ConfigureMvcOptions(MvcOptions options)
         {
             options.Filters.Add(new ProducesAttribute("application/json"));
             options.Filters.Add<ErrorResponseActionFilter>();
