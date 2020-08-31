@@ -23,6 +23,8 @@ namespace Swisschain.Sdk.Server.Benchmark.Grpc.Streaming
         public int _totalCount;
         private StreamItemCollection[] _arrayOfData;
         private StreamData<StreamItemCollection, StreamItem, long> _streamData;
+        private MessageReceived<StreamItemCollection> _messageReceivedFunc;
+        private TaskCompletionSource<int> _tcs;
 
         [GlobalSetup]
         public void Setup()
@@ -62,21 +64,36 @@ namespace Swisschain.Sdk.Server.Benchmark.Grpc.Streaming
             _streamService.Dispose();
         }
 
-        [Benchmark()]
-        public void Base()
+        [IterationSetup]
+        public void IterationSetup()
         {
             var counter = 0;
-            var tcs = new TaskCompletionSource<int>();
+            _tcs = new TaskCompletionSource<int>();
             var stream = _streamData.Stream as ServerStreamWriterFake;
-            MessageReceived<StreamItemCollection> messageReceivedFunc = (sender, collection) =>
+            _messageReceivedFunc = (sender, collection) =>
             {
                 counter++;
 
                 if (counter == _totalCount)
-                    tcs.TrySetResult(1);
+                    _tcs.TrySetResult(1);
             };
 
-            stream.MessageReceived += messageReceivedFunc;
+            stream.MessageReceived += _messageReceivedFunc;
+        }
+
+        [IterationCleanup]
+        public void IterationCleanup()
+        {
+            _streamData.Cursor = default;
+            _streamData.LastSentData = null;
+            var stream = _streamData.Stream as ServerStreamWriterFake;
+            stream.Messages.Clear();
+            stream.MessageReceived -= _messageReceivedFunc;
+        }
+
+        [Benchmark()]
+        public void Base()
+        {
 
             for (int i = 0; i < _totalCount; i++)
             {
@@ -84,12 +101,7 @@ namespace Swisschain.Sdk.Server.Benchmark.Grpc.Streaming
                 _streamService.WriteToStreamActual(item);
             }
 
-            tcs.Task.Wait(20_000);
-            
-            _streamData.Cursor = default;
-            _streamData.LastSentData = null;
-            stream.Messages.Clear();
-            stream.MessageReceived -= messageReceivedFunc;
+            _tcs.Task.Wait(20_000);
         }
 
         //[Benchmark]

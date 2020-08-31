@@ -25,6 +25,21 @@ namespace Swisschain.Sdk.Server.Benchmark
             //}
             //x.CleanUp();
 
+            //var x = new StreamServiceMultipleClientsBenchmark();
+            //x.TotalCount = 100;
+            //x.ConnectedStreams = 10;
+            //x.Setup();
+            //var sw = new Stopwatch();
+            //for (int i = 0; i < 10; i++)
+            //{
+            //    sw.Start();
+            //    x.Base();
+            //    sw.Stop();
+            //    Console.WriteLine($"{sw.ElapsedMilliseconds} ms.");
+            //    sw.Reset();
+            //}
+            //x.CleanUp();
+
             BenchmarkDotNet.Running.BenchmarkRunner.Run<StreamServiceBenchmark>();
             //config.With(ConfigOptions.DisableOptimizationsValidator)
             //BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
