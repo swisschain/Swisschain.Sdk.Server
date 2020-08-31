@@ -2,8 +2,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using Autofac;
+using Grpc.AspNetCore.Server;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -65,28 +68,8 @@ namespace Swisschain.Sdk.Server.Common
         public void ConfigureServices(IServiceCollection services)
         {
             services
-                .AddControllers(options =>
-                {
-                    options.Filters.Add(new ProducesAttribute("application/json"));
-                    options.Filters.Add<ErrorResponseActionFilter>();
-
-                    ConfigureControllers(options);
-                })
-                .AddNewtonsoftJson(options =>
-                {
-                    var namingStrategy = new CamelCaseNamingStrategy();
-
-                    options.SerializerSettings.Converters.Add(new StringEnumConverter(namingStrategy));
-                    options.SerializerSettings.NullValueHandling = NullValueHandling.Include;
-                    options.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
-                    options.SerializerSettings.Culture = CultureInfo.InvariantCulture;
-                    options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
-                    options.SerializerSettings.MissingMemberHandling = MissingMemberHandling.Error;
-                    options.SerializerSettings.ContractResolver = new DefaultContractResolver
-                    {
-                        NamingStrategy = namingStrategy
-                    };
-                });
+                .AddControllers(ConfigureMvcOptions)
+                .AddNewtonsoftJson(ConfigureMvcNewtonsoftJsonOptions);
 
             services.Configure<ApiBehaviorOptions>(options =>
             {
@@ -94,59 +77,20 @@ namespace Swisschain.Sdk.Server.Common
                 options.SuppressModelStateInvalidFilter = true;
             });
 
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = ApplicationInformation.AppName, Version = "v1" });
-                c.EnableXmsEnumExtension();
-                c.MakeResponseValueTypesRequired();
-
-                foreach (var code in ModelStateDictionaryResponseCodes)
-                {
-                    c.AddModelStateDictionaryResponse(code);
-                }
-
-                if (_useJwtAuth)
-                {
-                    c.AddJwtBearerAuthorization();
-                }
-
-                ConfigureSwaggerGen(c);
-            });
+            services.AddSwaggerGen(ConfigureSwaggerGenOptions);
             services.AddSwaggerGenNewtonsoftSupport();
 
-            services.AddGrpc();
+            services.AddGrpc(ConfigureGrpcServiceOptions);
 
-            services.AddCors(options => options.AddDefaultPolicy(builder =>
-            {
-                builder.AllowAnyHeader();
-                builder.AllowAnyMethod();
-                builder.AllowAnyOrigin();
-            }));
+            services.AddCors(ConfigureCorsOptions);
 
             services.AddSingleton(Config);
 
             if (_useJwtAuth)
             {
                 services
-                    .AddAuthentication(x =>
-                    {
-                        x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                        x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                    })
-                    .AddJwtBearer(x =>
-                    {
-                        x.RequireHttpsMetadata = false;
-                        x.SaveToken = true;
-                        x.TokenValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateIssuerSigningKey = true,
-                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtSecret)),
-                            ValidateIssuer = false,
-                            ValidateAudience = true,
-                            ValidAudience = _jwtAudience,
-                            ValidateLifetime = true
-                        };
-                    });
+                    .AddAuthentication(ConfigureAuthenticationOptions)
+                    .AddJwtBearer(ConfigureJwtBearerOptions);
             }
 
             services.AddGrpcReflection();
@@ -226,5 +170,85 @@ namespace Swisschain.Sdk.Server.Common
         protected virtual void ConfigureControllers(MvcOptions options)
         {
         }
+
+        protected virtual void ConfigureJwtBearerOptions(JwtBearerOptions options)
+        {
+            options.RequireHttpsMetadata = false;
+            options.SaveToken = true;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtSecret)),
+                ValidateIssuer = false,
+                ValidateAudience = true,
+                ValidAudience = _jwtAudience,
+                ValidateLifetime = true
+            };
+        }
+
+        protected virtual void ConfigureMvcNewtonsoftJsonOptions(MvcNewtonsoftJsonOptions options)
+        {
+            var namingStrategy = new CamelCaseNamingStrategy();
+
+            options.SerializerSettings.Converters.Add(new StringEnumConverter(namingStrategy));
+            options.SerializerSettings.NullValueHandling = NullValueHandling.Include;
+            options.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
+            options.SerializerSettings.Culture = CultureInfo.InvariantCulture;
+            options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+            options.SerializerSettings.MissingMemberHandling = MissingMemberHandling.Error;
+            options.SerializerSettings.ContractResolver = new DefaultContractResolver
+            {
+                NamingStrategy = namingStrategy
+            };
+        }
+
+        protected virtual void ConfigureAuthenticationOptions(AuthenticationOptions options)
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        }
+
+        private void ConfigureMvcOptions(MvcOptions options)
+        {
+            options.Filters.Add(new ProducesAttribute("application/json"));
+            options.Filters.Add<ErrorResponseActionFilter>();
+
+            ConfigureControllers(options);
+        }
+
+        protected virtual void ConfigureGrpcServiceOptions(GrpcServiceOptions options)
+        {
+
+        }
+
+        protected virtual void ConfigureCorsOptions(CorsOptions options)
+        {
+            options.AddDefaultPolicy(builder =>
+            {
+                builder.AllowAnyHeader();
+                builder.AllowAnyMethod();
+                builder.AllowAnyOrigin();
+            });
+        }
+
+        protected virtual void ConfigureSwaggerGenOptions(SwaggerGenOptions options)
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo { Title = ApplicationInformation.AppName, Version = "v1" });
+            options.EnableXmsEnumExtension();
+            options.MakeResponseValueTypesRequired();
+
+            foreach (var code in ModelStateDictionaryResponseCodes)
+            {
+                options.AddModelStateDictionaryResponse(code);
+            }
+
+            if (_useJwtAuth)
+            {
+                options.AddJwtBearerAuthorization();
+            }
+
+            ConfigureSwaggerGen(options);
+        }
+
     }
 }
