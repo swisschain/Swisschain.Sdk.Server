@@ -37,6 +37,7 @@ namespace Swisschain.Sdk.Server.Common
             ConfigRoot = configRoot;
             Config = ConfigRoot.Get<TAppSettings>();
             ExceptionHandlingMiddlewares = new List<(System.Type, object[])>();
+            AfterAuthHandlingMiddlewares = new List<(System.Type, object[])>();
             ModelStateDictionaryResponseCodes = new HashSet<int>();
 
             AddExceptionHandlingMiddleware<UnhandledExceptionsMiddleware>();
