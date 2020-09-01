@@ -50,7 +50,9 @@ namespace Swisschain.Sdk.Server.Common
         public TAppSettings Config { get; }
 
         public List<(System.Type Type, object[] Args)> ExceptionHandlingMiddlewares { get; }
-        
+
+        public List<(System.Type Type, object[] Args)> AfterAuthHandlingMiddlewares { get; }
+
         public ISet<int> ModelStateDictionaryResponseCodes { get; }
 
         protected void AddJwtAuth(string secret, string audience)
@@ -63,6 +65,12 @@ namespace Swisschain.Sdk.Server.Common
         protected void AddExceptionHandlingMiddleware<TMiddleware>(params object[] args)
         {
             ExceptionHandlingMiddlewares.Add((typeof(TMiddleware), args));
+        }
+
+
+        protected void  AddAfterAuthHandlingMiddlewares<TMiddleware>(params object[] args)
+        {
+            AfterAuthHandlingMiddlewares.Add((typeof(TMiddleware), args));
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -123,6 +131,11 @@ namespace Swisschain.Sdk.Server.Common
                 app.UseAuthentication();
 
             app.UseAuthorization();
+
+            foreach (var (type, args) in AfterAuthHandlingMiddlewares)
+            {
+                app.UseMiddleware(type, args);
+            }
 
             app.UseEndpoints(endpoints =>
             {
