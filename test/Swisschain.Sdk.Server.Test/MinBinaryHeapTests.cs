@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Swisschain.Sdk.Server.Grpc.Streaming;
+using Swisschain.Sdk.Server.Test.Common.Grpc.Streaming;
 using Xunit;
 
 namespace Swisschain.Sdk.Server.Test

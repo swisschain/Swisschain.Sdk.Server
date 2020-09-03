@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Swisschain.Sdk.Server\Swisschain.Sdk.Server.csproj" />
+    <ProjectReference Include="..\Swisschain.Sdk.Server.Test.Common\Swisschain.Sdk.Server.Test.Common.csproj" />
   </ItemGroup>
 
 </Project>

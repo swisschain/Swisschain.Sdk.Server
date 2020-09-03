@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Swisschain.Sdk.Server.Grpc.Streaming;
 
-namespace Swisschain.Sdk.Server.Test
+namespace Swisschain.Sdk.Server.Test.Common.Grpc.Streaming
 {
     public class StreamServiceExample : StreamServiceBase<StreamItemCollection, StreamItem, long>
     {
