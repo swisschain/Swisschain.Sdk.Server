@@ -52,6 +52,18 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             return data;
         }
 
+        protected virtual Task BeforeStreamRegistered(
+            StreamInfo<TStreamItemCollection> streamInfo)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected virtual Task AfterStreamRemoved(
+            StreamData<TStreamItemCollection, TStreamItem, TStreamItemId> streamData)
+        {
+            return Task.CompletedTask;
+        }
+
         /// <summary>
         /// Use this method to write to stream directly from database
         /// </summary>
@@ -118,9 +130,11 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             }
         }
 
-        public StreamData<TStreamItemCollection, TStreamItem, TStreamItemId> RegisterStream(StreamInfo<TStreamItemCollection> streamInfo,
+        public async Task<StreamData<TStreamItemCollection, TStreamItem, TStreamItemId>> RegisterStream(StreamInfo<TStreamItemCollection> streamInfo,
             StreamFilterBase<TStreamItem, TStreamItemId> filter)
         {
+            await BeforeStreamRegistered(streamInfo);
+
             var data = StreamData<TStreamItemCollection, TStreamItem, TStreamItemId>.Create(
                 streamInfo,
                 filter,
@@ -148,6 +162,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
 
         public void Dispose()
         {
+            IReadOnlyCollection<StreamData<TStreamItemCollection, TStreamItem, TStreamItemId>> streams = null;
             _readerWriterLock.AcquireWriterLock(Timeout.Infinite);
 
             try
@@ -155,6 +170,8 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
                 _cancellationTokenSource.Cancel();
                 _checkTimer.Dispose();
                 _pingTimer?.Dispose();
+
+                streams = _streamList.ToArray();
 
                 foreach (var streamInfo in _streamList)
                 {
@@ -168,9 +185,13 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             {
                 _readerWriterLock.ReleaseWriterLock();
             }
+
+            var tasks = streams.Select(AfterStreamRemoved).ToArray();
+
+            Task.WaitAll(tasks, 60_000);
         }
 
-        private void RemoveStream(StreamData<TStreamItemCollection, TStreamItem, TStreamItemId> streamData)
+        private async Task RemoveStream(StreamData<TStreamItemCollection, TStreamItem, TStreamItemId> streamData)
         {
             streamData.CompletionTask.TrySetResult(1);
 
@@ -184,6 +205,8 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             {
                 _readerWriterLock.ReleaseWriterLock();
             }
+
+            await AfterStreamRemoved(streamData);
 
             _logger.LogDebug($"StreamService<{typeof(TStreamItemCollection).Name}> Remove stream connection (peer: {streamData.Peer})");
         }
@@ -223,7 +246,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
                         Peer = streamData.Peer,
                         Type = typeof(TStreamItemCollection).Name
                     });
-                RemoveStream(streamData);
+                await RemoveStream(streamData);
             }
         }
 
@@ -237,10 +260,14 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
                 .Where(x => x.CancelationToken.HasValue && x.CancelationToken.Value.IsCancellationRequested)
                 .ToList();
 
+                var tasks = new List<Task>(streamsToRemove.Count);
                 foreach (var streamData in streamsToRemove)
                 {
-                    RemoveStream(streamData);
+                    tasks.Add(RemoveStream(streamData));
                 }
+
+                if (tasks.Any())
+                    Task.WaitAll(tasks.ToArray());
 
                 countToRemove = streamsToRemove.Count;
             }

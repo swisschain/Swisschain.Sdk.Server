@@ -14,6 +14,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
         public StreamFilterBase<TStreamItem, TStreamItemId> Filter { get; set; }
         public TStreamItemCollection LastSentData { get; set; }
         public TStreamItemId Cursor { get; set; }
+
         internal Queue<TStreamItemCollection> Queue { get; set; }
 
         internal TaskCompletionSource<int> CompletionTask { get; set; }

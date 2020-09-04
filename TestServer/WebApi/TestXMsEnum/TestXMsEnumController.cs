@@ -10,8 +10,6 @@ namespace TestServer.WebApi.TestXMsEnum
         public AResponse Test([FromRoute] AEnum value, [FromQuery] AEnum queryStringValue, [FromBody] ARequest request)
         {
             throw new InvalidOperationException("123");
-
-            return new AResponse();
         }
     }
 }

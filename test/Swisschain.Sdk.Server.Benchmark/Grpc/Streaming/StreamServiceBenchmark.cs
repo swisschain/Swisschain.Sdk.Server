@@ -1,4 +1,5 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using System;
+using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using Microsoft.Extensions.Logging;
 using Swisschain.Sdk.Server.Grpc.Streaming;
@@ -13,6 +14,7 @@ namespace Swisschain.Sdk.Server.Benchmark.Grpc.Streaming
     [CsvMeasurementsExporter]
     [HtmlExporter]
     [PlainExporter]
+    [RPlotExporter]
     [GcServer(true)]
     [ThreadingDiagnoser]
     [MemoryDiagnoser]
@@ -54,7 +56,7 @@ namespace Swisschain.Sdk.Server.Benchmark.Grpc.Streaming
                 Stream = serverStreamWriter
             };
 
-            _streamData = _streamService.RegisterStream(streamInfo, new Filter());
+            _streamData = _streamService.RegisterStream(streamInfo, new Filter()).GetAwaiter().GetResult();
             _streamService.SwitchToReady(_streamData);
         }
 
@@ -89,6 +91,7 @@ namespace Swisschain.Sdk.Server.Benchmark.Grpc.Streaming
             var stream = _streamData.Stream as ServerStreamWriterFake;
             stream.Messages.Clear();
             stream.MessageReceived -= _messageReceivedFunc;
+            GC.Collect();
         }
 
         [Benchmark()]
