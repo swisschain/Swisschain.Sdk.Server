@@ -53,7 +53,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
         }
 
         protected virtual Task BeforeStreamRegistered(
-            StreamData<TStreamItemCollection, TStreamItem, TStreamItemId> streamData)
+            StreamInfo<TStreamItemCollection> streamInfo)
         {
             return Task.CompletedTask;
         }
@@ -133,13 +133,13 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
         public async Task<StreamData<TStreamItemCollection, TStreamItem, TStreamItemId>> RegisterStream(StreamInfo<TStreamItemCollection> streamInfo,
             StreamFilterBase<TStreamItem, TStreamItemId> filter)
         {
+            await BeforeStreamRegistered(streamInfo);
+
             var data = StreamData<TStreamItemCollection, TStreamItem, TStreamItemId>.Create(
                 streamInfo,
                 filter,
                 this._logger,
                 this.WriteToStream);
-
-            await BeforeStreamRegistered(data);
 
             _readerWriterLock.AcquireWriterLock(Timeout.Infinite);
 
