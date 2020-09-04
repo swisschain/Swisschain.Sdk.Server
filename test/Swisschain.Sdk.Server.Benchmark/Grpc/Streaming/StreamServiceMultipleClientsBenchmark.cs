@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
@@ -17,6 +18,7 @@ namespace Swisschain.Sdk.Server.Benchmark.Grpc.Streaming
     [SimpleJob(RuntimeMoniker.NetCoreApp31)]
     [CsvExporter]
     [CsvMeasurementsExporter]
+    [RPlotExporter]
     [HtmlExporter]
     [PlainExporter]
     [GcServer(true)]
@@ -29,7 +31,7 @@ namespace Swisschain.Sdk.Server.Benchmark.Grpc.Streaming
             public Config()
             {
 
-                Add(
+                AddColumn(
                     StatisticColumn.MValue,
                     StatisticColumn.Max,
                     StatisticColumn.Min);
@@ -82,7 +84,8 @@ namespace Swisschain.Sdk.Server.Benchmark.Grpc.Streaming
                     Stream = serverStreamWriter
                 };
 
-                var streamDataItem = _streamService.RegisterStream(streamInfo, new Filter());
+                var streamDataItem = _streamService.RegisterStream(streamInfo, new Filter())
+                    .GetAwaiter().GetResult();
                 _streamService.SwitchToReady(streamDataItem);
                 list.Add(streamDataItem);
             }
@@ -136,6 +139,8 @@ namespace Swisschain.Sdk.Server.Benchmark.Grpc.Streaming
                 stream.Messages.Clear();
                 stream.MessageReceived -= _messageReceiveds[i];
             }
+
+            GC.Collect();
         }
 
         [Benchmark()]

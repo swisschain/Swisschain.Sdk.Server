@@ -40,9 +40,9 @@ namespace Swisschain.Sdk.Server.Benchmark
             //}
             //x.CleanUp();
 
-            BenchmarkDotNet.Running.BenchmarkRunner.Run<StreamServiceBenchmark>();
+            //BenchmarkDotNet.Running.BenchmarkRunner.Run<StreamServiceBenchmark>();
             //config.With(ConfigOptions.DisableOptimizationsValidator)
-            //BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+            BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
         }
     }
 }

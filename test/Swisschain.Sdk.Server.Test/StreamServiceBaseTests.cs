@@ -26,7 +26,7 @@ namespace Swisschain.Sdk.Server.Test
                 Stream = serverStreamWriter
             };
 
-            var streamData = streamService.RegisterStream(streamInfo, new Filter());
+            var streamData = await streamService.RegisterStream(streamInfo, new Filter());
             var completionTask = streamData.GetCompletionTask();
             streamService.SwitchToReady(streamData);
             streamService.WriteToStreamActual(new StreamItemCollection(new StreamItem[]
@@ -34,12 +34,12 @@ namespace Swisschain.Sdk.Server.Test
                 new StreamItem()
                 {
                     StreamItemId = 10
-                }, 
+                },
             }));
 
-            
+
             var delayTask = Task.Delay(TimeSpan.FromSeconds(5));
-            var firstCompleted = Task.WaitAny(new Task[] {delayTask, completionTask});
+            var firstCompleted = Task.WaitAny(new Task[] { delayTask, completionTask });
 
             Assert.Equal(0, firstCompleted);
 
@@ -64,7 +64,7 @@ namespace Swisschain.Sdk.Server.Test
                 Stream = serverStreamWriter
             };
 
-            var streamData = streamService.RegisterStream(streamInfo, new Filter());
+            var streamData = await streamService.RegisterStream(streamInfo, new Filter());
             var completionTask = streamData.GetCompletionTask();
             streamService.SwitchToReady(streamData);
 
@@ -94,7 +94,7 @@ namespace Swisschain.Sdk.Server.Test
                 Stream = serverStreamWriter
             };
 
-            var streamData = streamService.RegisterStream(streamInfo, new Filter());
+            var streamData = await streamService.RegisterStream(streamInfo, new Filter());
             var tcs = new TaskCompletionSource<int>();
             var counter = 0;
             serverStreamWriter.MessageReceived += (sender, collection) =>
@@ -150,7 +150,7 @@ namespace Swisschain.Sdk.Server.Test
             }
 
             var timeoutTask = Task.Delay(TimeSpan.FromMinutes(1));
-            var firstCompleted = Task.WaitAny(new Task[] {  completionTask, tcs.Task, timeoutTask });
+            var firstCompleted = Task.WaitAny(new Task[] { completionTask, tcs.Task, timeoutTask });
 
             Assert.True(firstCompleted < 2);
 
@@ -175,7 +175,7 @@ namespace Swisschain.Sdk.Server.Test
                 Stream = serverStreamWriter
             };
 
-            var streamData = streamService.RegisterStream(streamInfo, new Filter());
+            var streamData = await streamService.RegisterStream(streamInfo, new Filter());
             var tcs = new TaskCompletionSource<int>();
             var completionTask = streamData.GetCompletionTask();
 
@@ -218,6 +218,58 @@ namespace Swisschain.Sdk.Server.Test
 
             streamService.Dispose();
             serverStreamWriter.Dispose();
+        }
+
+        [Fact]
+        public async Task CheckBeforeAndAfterProcessingTest()
+        {
+            var afterStreamRemovedProcessed = false;
+            var beforeStreamRegisteredProcessed = false;
+
+            var loggerFactory = new LoggerFactory();
+            var streamService = new StreamServiceExample(
+                loggerFactory.CreateLogger("StreamServiceBaseTests"), false, 100,
+                data =>
+                {
+                    afterStreamRemovedProcessed = true;
+                    return Task.CompletedTask;
+                },
+                data =>
+                {
+                    beforeStreamRegisteredProcessed = true;
+                    return Task.CompletedTask;
+                });
+            var cts = new CancellationTokenSource();
+            var serverStreamWriter = new ServerStreamWriterFake();
+            var streamInfo = new StreamInfo<StreamItemCollection>()
+            {
+                CancelationToken = cts.Token,
+                Keys = new[] { "tenantId" },
+                Peer = "127.0.0.1:5000",
+                Stream = serverStreamWriter
+            };
+
+            var streamData = await streamService.RegisterStream(streamInfo, new Filter());
+            var completionTask = streamData.GetCompletionTask();
+
+            streamService.SwitchToReady(streamData);
+
+            streamService.WriteToStreamActual(new StreamItemCollection(new StreamItem[]
+                                {
+                        new StreamItem()
+                        {
+                            StreamItemId = 0
+                        },
+                                }));
+
+            var timeoutTask = Task.Delay(TimeSpan.FromMilliseconds(10_000));
+            var firstCompleted = Task.WaitAny(new Task[] { completionTask, timeoutTask });
+
+            streamService.Dispose();
+            serverStreamWriter.Dispose();
+
+            Assert.True(afterStreamRemovedProcessed);
+            Assert.True(beforeStreamRegisteredProcessed);
         }
     }
 }
