@@ -43,6 +43,10 @@ namespace Swisschain.Sdk.Server.Logging
                 Log.Fatal((Exception)e.ExceptionObject, "Application has been terminated unexpectedly");
                 Log.CloseAndFlush();
             };
+            AppDomain.CurrentDomain.ProcessExit += (sender, e) =>
+            {
+                Log.CloseAndFlush();
+            };
 
             return new LoggerFactory().AddSerilog();
         }
@@ -135,7 +139,8 @@ namespace Swisschain.Sdk.Server.Logging
                     new ElasticsearchSinkOptions(elasticsearchUrlsConfig.NodeUrls.Select(u => new Uri(u)))
                     {
                         AutoRegisterTemplate = true,
-                        AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv6,
+                        EmitEventFailure = EmitEventFailureHandling.WriteToSelfLog,
+                        AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
                         IndexDecider = (e, o) => $"{indexPrefix}-{o.Date:yyyy-MM-dd}",
                     });
 
