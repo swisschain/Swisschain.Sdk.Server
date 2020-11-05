@@ -9,7 +9,7 @@ using Swisschain.Extensions.Grpc.Abstractions;
 namespace Swisschain.Sdk.Server.Grpc.Streaming
 {
     public abstract class StreamServiceBase<TStreamItemCollection, TStreamItem, TStreamItemId> : IDisposable
-        where TStreamItemCollection : class, IStreamItemCollection<TStreamItem, TStreamItemId>
+        where TStreamItemCollection : class, IStreamItemCollection<TStreamItem, TStreamItemId>, new()
         where TStreamItemId : IComparable<TStreamItemId>, IComparable
         where TStreamItem : IStreamItem<TStreamItemId>
     {
@@ -22,7 +22,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             new List<StreamData<TStreamItemCollection, TStreamItem, TStreamItemId>>();
 
         private readonly CancellationTokenSource _cancellationTokenSource;
-        private static TStreamItemCollection _pingItem = Activator.CreateInstance<TStreamItemCollection>();
+        private static readonly TStreamItemCollection _pingItem = new TStreamItemCollection();
 
         public StreamServiceBase(ILogger logger, bool needPing = false, int pingPeriodMs = 30_000)
         {
