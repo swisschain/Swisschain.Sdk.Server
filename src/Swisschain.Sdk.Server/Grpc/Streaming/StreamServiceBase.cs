@@ -219,7 +219,8 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
                 var processedData = ProcessDataBeforeSend(data, streamData);
                 
                 //Ping
-                if (!data.StreamItems.Any())
+                if (data.StreamItems == null || 
+                    !data.StreamItems.Any())
                 {
                     await streamData.Stream.WriteAsync(processedData);
 
