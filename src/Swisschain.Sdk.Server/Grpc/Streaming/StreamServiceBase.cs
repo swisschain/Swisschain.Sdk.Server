@@ -22,6 +22,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             new List<StreamData<TStreamItemCollection, TStreamItem, TStreamItemId>>();
 
         private readonly CancellationTokenSource _cancellationTokenSource;
+        private static TStreamItemCollection _pingItem = Activator.CreateInstance<TStreamItemCollection>();
 
         public StreamServiceBase(ILogger logger, bool needPing = false, int pingPeriodMs = 30_000)
         {
@@ -216,10 +217,17 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             try
             {
                 var processedData = ProcessDataBeforeSend(data, streamData);
-                //Skip already processed messages
+                
+                //Ping
                 if (!data.StreamItems.Any())
+                {
                     await streamData.Stream.WriteAsync(processedData);
 
+                    return;
+
+                }
+
+                //Skip already processed messages
                 if (data.StreamItems.All(y => y.StreamItemId.CompareTo(streamData.Cursor) < 0))
                 {
                     _logger.LogWarning("Skipped message during streaming {@context}",
@@ -287,7 +295,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             {
                 foreach (var streamData in _streamList)
                 {
-                    var instance = streamData.LastSentData ?? Activator.CreateInstance<TStreamItemCollection>();
+                    var instance = _pingItem;
 
                     try
                     {
