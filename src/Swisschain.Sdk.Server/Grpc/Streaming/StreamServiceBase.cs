@@ -136,6 +136,8 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
         {
             await BeforeStreamRegistered(streamInfo);
 
+            _logger.LogDebug($"StreamService<{typeof(TStreamItemCollection).Name}> Register stream connection (peer: {streamInfo.Peer})");
+
             var data = StreamData<TStreamItemCollection, TStreamItem, TStreamItemId>.Create(
                 streamInfo,
                 filter,
