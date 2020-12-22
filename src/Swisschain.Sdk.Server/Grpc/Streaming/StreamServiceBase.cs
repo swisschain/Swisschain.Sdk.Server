@@ -204,7 +204,7 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
             }
             catch (Exception e)
             {
-                _logger.LogDebug(
+                _logger.LogError(
                     $"StreamService<{typeof(TStreamItemCollection).Name}> Remove stream, error happened (peer: {streamData.Peer})", e);
                 return;
             }
