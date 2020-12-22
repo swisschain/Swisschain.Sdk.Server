@@ -198,7 +198,16 @@ namespace Swisschain.Sdk.Server.Grpc.Streaming
         {
             streamData.CompletionTask.TrySetResult(1);
 
-            _readerWriterLock.AcquireWriterLock(Timeout.Infinite);
+            try
+            {
+                _readerWriterLock.AcquireWriterLock(TimeSpan.FromSeconds(10));
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(
+                    $"StreamService<{typeof(TStreamItemCollection).Name}> Remove stream, error happened (peer: {streamData.Peer})", e);
+                return;
+            }
 
             try
             {
