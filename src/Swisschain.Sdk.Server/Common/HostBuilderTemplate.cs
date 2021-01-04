@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Net;
-using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
@@ -67,7 +66,6 @@ namespace Swisschain.Sdk.Server.Common
                     });
                     optionsWebHostBuilder(webBuilder);
                 })
-                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
                     config.Sources.Clear();

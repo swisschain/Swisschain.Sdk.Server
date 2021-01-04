@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
-using Autofac;
 using Grpc.AspNetCore.Server;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -107,11 +106,6 @@ namespace Swisschain.Sdk.Server.Common
             ConfigureServicesExt(services);
         }
 
-        public void ConfigureContainer(ContainerBuilder builder)
-        {
-            ConfigureContainerExt(builder);
-        }
-
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -167,11 +161,6 @@ namespace Swisschain.Sdk.Server.Common
         }
 
         protected virtual void ConfigureExt(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-
-        }
-
-        protected virtual void ConfigureContainerExt(ContainerBuilder builder)
         {
 
         }
