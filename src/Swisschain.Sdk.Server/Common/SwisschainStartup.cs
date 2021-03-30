@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -35,8 +36,9 @@ namespace Swisschain.Sdk.Server.Common
         {
             ConfigRoot = configRoot;
             Config = ConfigRoot.Get<TAppSettings>();
-            ExceptionHandlingMiddlewares = new List<(System.Type, object[])>();
-            AfterAuthHandlingMiddlewares = new List<(System.Type, object[])>();
+            ExceptionHandlingMiddlewares = new List<(Type, object[])>();
+            AfterAuthHandlingMiddlewares = new List<(Type, object[])>();
+            AfterRoutingHandlingMiddlewares = new List<(Type Type, object[] Args)>();
             ModelStateDictionaryResponseCodes = new HashSet<int>();
 
             AddExceptionHandlingMiddleware<UnhandledExceptionsMiddleware>();
@@ -49,9 +51,11 @@ namespace Swisschain.Sdk.Server.Common
 
         public TAppSettings Config { get; }
 
-        public List<(System.Type Type, object[] Args)> ExceptionHandlingMiddlewares { get; }
+        public List<(Type Type, object[] Args)> ExceptionHandlingMiddlewares { get; }
 
-        public List<(System.Type Type, object[] Args)> AfterAuthHandlingMiddlewares { get; }
+        public List<(Type Type, object[] Args)> AfterAuthHandlingMiddlewares { get; }
+
+        public List<(Type Type, object[] Args)> AfterRoutingHandlingMiddlewares { get; }
 
         public ISet<int> ModelStateDictionaryResponseCodes { get; }
 
@@ -67,10 +71,14 @@ namespace Swisschain.Sdk.Server.Common
             ExceptionHandlingMiddlewares.Add((typeof(TMiddleware), args));
         }
 
-
-        protected void  AddAfterAuthHandlingMiddlewares<TMiddleware>(params object[] args)
+        protected void AddAfterAuthHandlingMiddlewares<TMiddleware>(params object[] args)
         {
             AfterAuthHandlingMiddlewares.Add((typeof(TMiddleware), args));
+        }
+
+        protected void AddAfterRoutingHandlingMiddlewares<TMiddleware>(params object[] args)
+        {
+            AfterRoutingHandlingMiddlewares.Add((typeof(TMiddleware), args));
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -119,6 +127,11 @@ namespace Swisschain.Sdk.Server.Common
             }
 
             app.UseRouting();
+
+            foreach (var (type, args) in AfterRoutingHandlingMiddlewares)
+            {
+                app.UseMiddleware(type, args);
+            }
 
             app.UseCors();
 
