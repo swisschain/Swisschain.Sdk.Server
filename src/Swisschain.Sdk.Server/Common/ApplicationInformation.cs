@@ -27,8 +27,16 @@ namespace Swisschain.Sdk.Server.Common
 
         public static DateTime StartedAt { get; }
 
-        public static string AppName { get; }
+        public static string AppName { get; private set; }
 
         public static string AppVersion { get; }
+
+        public static void SetAppName(string appName)
+        {
+            if (!string.IsNullOrWhiteSpace(appName))
+            {
+                AppName = appName;
+            }
+        }
     }
 }

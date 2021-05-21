@@ -14,8 +14,11 @@ namespace Swisschain.Sdk.Server.Logging
     public static class LogConfigurator
     {
         public static ILoggerFactory Configure(string productName = default,
-            IReadOnlyCollection<string> remoteSettingsUrls = default)
+            IReadOnlyCollection<string> remoteSettingsUrls = default, string appName = default)
         {
+            if (!string.IsNullOrWhiteSpace(appName))
+                ApplicationInformation.SetAppName(appName);
+
             Console.WriteLine($"App - name: {ApplicationInformation.AppName}");
             Console.WriteLine($"App - version: {ApplicationInformation.AppVersion}");
 
@@ -134,7 +137,7 @@ namespace Swisschain.Sdk.Server.Logging
             if (elasticsearchUrlsConfig?.NodeUrls != null && elasticsearchUrlsConfig.NodeUrls.Any())
             {
                 var indexPrefix = elasticsearchUrlsConfig?.IndexPrefixName ?? "log";
-                
+
                 config.WriteTo.Elasticsearch(
                     new ElasticsearchSinkOptions(elasticsearchUrlsConfig.NodeUrls.Select(u => new Uri(u)))
                     {
