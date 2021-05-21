@@ -14,11 +14,8 @@ namespace Swisschain.Sdk.Server.Logging
     public static class LogConfigurator
     {
         public static ILoggerFactory Configure(string productName = default,
-            IReadOnlyCollection<string> remoteSettingsUrls = default, string appName = default)
+            IReadOnlyCollection<string> remoteSettingsUrls = default, Func<IConfigurationRoot, IReadOnlyDictionary<string, string>> additionalPropertiesFactory = default)
         {
-            if (!string.IsNullOrWhiteSpace(appName))
-                ApplicationInformation.SetAppName(appName);
-
             Console.WriteLine($"App - name: {ApplicationInformation.AppName}");
             Console.WriteLine($"App - version: {ApplicationInformation.AppVersion}");
 
@@ -31,7 +28,7 @@ namespace Swisschain.Sdk.Server.Logging
                 .Enrich.WithCorrelationIdHeader()
                 .Enrich.WithRequestIdHeader();
 
-            SetupProperty(productName, config);
+            SetupProperty(productName, config, configRoot, additionalPropertiesFactory);
 
             SetupConsole(configRoot, config);
 
@@ -80,7 +77,9 @@ namespace Swisschain.Sdk.Server.Logging
             return configRoot;
         }
 
-        private static void SetupProperty(string productName, LoggerConfiguration config)
+        private static void SetupProperty(string productName, LoggerConfiguration config,
+            IConfigurationRoot configRoot,
+            Func<IConfigurationRoot, IReadOnlyDictionary<string, string>> additionalPropertiesFactory)
         {
             config
                 .Enrich.WithProperty("app-name", ApplicationInformation.AppName)
@@ -93,6 +92,12 @@ namespace Swisschain.Sdk.Server.Logging
             {
                 config.Enrich.WithProperty("product-name", productName);
             }
+
+            var properties = additionalPropertiesFactory?.Invoke(configRoot)
+                             ?? new Dictionary<string, string>();
+
+            foreach (var (name, value) in properties)
+                config.Enrich.WithProperty(name, value);
         }
 
         private static void SetupConsole(IConfigurationRoot configRoot, LoggerConfiguration config)
