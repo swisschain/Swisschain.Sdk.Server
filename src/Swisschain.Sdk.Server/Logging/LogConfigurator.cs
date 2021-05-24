@@ -81,8 +81,11 @@ namespace Swisschain.Sdk.Server.Logging
             IConfigurationRoot configRoot,
             Func<IConfigurationRoot, IReadOnlyDictionary<string, string>> additionalPropertiesFactory)
         {
+            var properties = additionalPropertiesFactory?.Invoke(configRoot)
+                             ?? new Dictionary<string, string>();
+
             config
-                .Enrich.WithProperty("app-name", ApplicationInformation.AppName)
+                .Enrich.WithProperty("app-name", properties.ContainsKey("app-name") ? properties["app-name"] : ApplicationInformation.AppName)
                 .Enrich.WithProperty("app-version", ApplicationInformation.AppVersion)
                 .Enrich.WithProperty("host-name", ApplicationEnvironment.HostName ?? ApplicationEnvironment.UserName)
                 .Enrich.WithProperty("environment", ApplicationEnvironment.Environment)
@@ -93,11 +96,10 @@ namespace Swisschain.Sdk.Server.Logging
                 config.Enrich.WithProperty("product-name", productName);
             }
 
-            var properties = additionalPropertiesFactory?.Invoke(configRoot)
-                             ?? new Dictionary<string, string>();
-
             foreach (var (name, value) in properties)
+            {
                 config.Enrich.WithProperty(name, value);
+            }
         }
 
         private static void SetupConsole(IConfigurationRoot configRoot, LoggerConfiguration config)
