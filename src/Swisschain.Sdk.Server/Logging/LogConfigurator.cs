@@ -14,7 +14,7 @@ namespace Swisschain.Sdk.Server.Logging
     public static class LogConfigurator
     {
         public static ILoggerFactory Configure(string productName = default,
-            IReadOnlyCollection<string> remoteSettingsUrls = default)
+            IReadOnlyCollection<string> remoteSettingsUrls = default, Func<IConfigurationRoot, IReadOnlyDictionary<string, string>> additionalPropertiesFactory = default)
         {
             Console.WriteLine($"App - name: {ApplicationInformation.AppName}");
             Console.WriteLine($"App - version: {ApplicationInformation.AppVersion}");
@@ -28,7 +28,7 @@ namespace Swisschain.Sdk.Server.Logging
                 .Enrich.WithCorrelationIdHeader()
                 .Enrich.WithRequestIdHeader();
 
-            SetupProperty(productName, config);
+            SetupProperty(productName, config, configRoot, additionalPropertiesFactory);
 
             SetupConsole(configRoot, config);
 
@@ -77,19 +77,36 @@ namespace Swisschain.Sdk.Server.Logging
             return configRoot;
         }
 
-        private static void SetupProperty(string productName, LoggerConfiguration config)
+        private static void SetupProperty(string productName, LoggerConfiguration config,
+            IConfigurationRoot configRoot,
+            Func<IConfigurationRoot, IReadOnlyDictionary<string, string>> additionalPropertiesFactory)
         {
-            config
-                .Enrich.WithProperty("app-name", ApplicationInformation.AppName)
-                .Enrich.WithProperty("app-version", ApplicationInformation.AppVersion)
-                .Enrich.WithProperty("host-name", ApplicationEnvironment.HostName ?? ApplicationEnvironment.UserName)
-                .Enrich.WithProperty("environment", ApplicationEnvironment.Environment)
-                .Enrich.WithProperty("started-at", ApplicationInformation.StartedAt);
+            var properties = additionalPropertiesFactory?.Invoke(configRoot)
+                             ?? new Dictionary<string, string>();
+
+            foreach (var (name, value) in properties)
+            {
+                config.Enrich.WithProperty(name, value);
+            }
+
+            EnrichWithProperty(config, "app-name", ApplicationInformation.AppName, properties);
+            EnrichWithProperty(config, "app-version", ApplicationInformation.AppVersion, properties);
+            EnrichWithProperty(config, "host-name", ApplicationEnvironment.HostName ?? ApplicationEnvironment.UserName, properties);
+            EnrichWithProperty(config, "environment", ApplicationEnvironment.Environment, properties);
+            EnrichWithProperty(config, "started-at", ApplicationInformation.StartedAt, properties);
 
             if (productName != default)
             {
                 config.Enrich.WithProperty("product-name", productName);
             }
+        }
+
+        private static void EnrichWithProperty(LoggerConfiguration config, string name, object value, IReadOnlyDictionary<string, string> additionalProperties)
+        {
+            if (additionalProperties.ContainsKey(name))
+                return;
+
+            config.Enrich.WithProperty(name, value);
         }
 
         private static void SetupConsole(IConfigurationRoot configRoot, LoggerConfiguration config)
@@ -134,7 +151,7 @@ namespace Swisschain.Sdk.Server.Logging
             if (elasticsearchUrlsConfig?.NodeUrls != null && elasticsearchUrlsConfig.NodeUrls.Any())
             {
                 var indexPrefix = elasticsearchUrlsConfig?.IndexPrefixName ?? "log";
-                
+
                 config.WriteTo.Elasticsearch(
                     new ElasticsearchSinkOptions(elasticsearchUrlsConfig.NodeUrls.Select(u => new Uri(u)))
                     {
