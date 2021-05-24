@@ -84,22 +84,29 @@ namespace Swisschain.Sdk.Server.Logging
             var properties = additionalPropertiesFactory?.Invoke(configRoot)
                              ?? new Dictionary<string, string>();
 
-            config
-                .Enrich.WithProperty("app-name", properties.ContainsKey("app-name") ? properties["app-name"] : ApplicationInformation.AppName)
-                .Enrich.WithProperty("app-version", ApplicationInformation.AppVersion)
-                .Enrich.WithProperty("host-name", ApplicationEnvironment.HostName ?? ApplicationEnvironment.UserName)
-                .Enrich.WithProperty("environment", ApplicationEnvironment.Environment)
-                .Enrich.WithProperty("started-at", ApplicationInformation.StartedAt);
+            foreach (var (name, value) in properties)
+            {
+                config.Enrich.WithProperty(name, value);
+            }
+
+            EnrichWithProperty(config, "app-name", ApplicationInformation.AppName, properties);
+            EnrichWithProperty(config, "app-version", ApplicationInformation.AppVersion, properties);
+            EnrichWithProperty(config, "host-name", ApplicationEnvironment.HostName ?? ApplicationEnvironment.UserName, properties);
+            EnrichWithProperty(config, "environment", ApplicationEnvironment.Environment, properties);
+            EnrichWithProperty(config, "started-at", ApplicationInformation.StartedAt, properties);
 
             if (productName != default)
             {
                 config.Enrich.WithProperty("product-name", productName);
             }
+        }
 
-            foreach (var (name, value) in properties)
-            {
-                config.Enrich.WithProperty(name, value);
-            }
+        private static void EnrichWithProperty(LoggerConfiguration config, string name, object value, IReadOnlyDictionary<string, string> additionalProperties)
+        {
+            if (additionalProperties.ContainsKey(name))
+                return;
+
+            config.Enrich.WithProperty(name, value);
         }
 
         private static void SetupConsole(IConfigurationRoot configRoot, LoggerConfiguration config)
