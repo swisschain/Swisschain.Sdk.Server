@@ -7,6 +7,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
 using Swisschain.Sdk.Server.Common;
+using Swisschain.Sdk.Server.Configuration.FileJsonSettings;
 using Swisschain.Sdk.Server.Configuration.WebJsonSettings;
 
 namespace Swisschain.Sdk.Server.Logging
@@ -14,12 +15,12 @@ namespace Swisschain.Sdk.Server.Logging
     public static class LogConfigurator
     {
         public static ILoggerFactory Configure(string productName = default,
-            IReadOnlyCollection<string> remoteSettingsUrls = default, Func<IConfigurationRoot, IReadOnlyDictionary<string, string>> additionalPropertiesFactory = default)
+            IReadOnlyCollection<string> remoteSettingsUrls = default, Func<IConfigurationRoot, IReadOnlyDictionary<string, string>> additionalPropertiesFactory = default, FileJsonSettingsLocations jsonSettingsLocations = default)
         {
             Console.WriteLine($"App - name: {ApplicationInformation.AppName}");
             Console.WriteLine($"App - version: {ApplicationInformation.AppVersion}");
 
-            IConfigurationRoot configRoot = BuildConfigRoot(remoteSettingsUrls);
+            IConfigurationRoot configRoot = BuildConfigRoot(remoteSettingsUrls, jsonSettingsLocations);
 
             var config = new LoggerConfiguration()
                 .ReadFrom.Configuration(configRoot)
@@ -51,7 +52,7 @@ namespace Swisschain.Sdk.Server.Logging
             return new LoggerFactory().AddSerilog();
         }
 
-        private static IConfigurationRoot BuildConfigRoot(IReadOnlyCollection<string> remoteSettingsUrls)
+        private static IConfigurationRoot BuildConfigRoot(IReadOnlyCollection<string> remoteSettingsUrls, FileJsonSettingsLocations jsonSettingsLocations)
         {
             var configBuilder = new ConfigurationBuilder();
 
@@ -67,6 +68,8 @@ namespace Swisschain.Sdk.Server.Logging
                         isOptional: !isRemoteSettingsRequired);
                 }
             }
+            
+            configBuilder.AddFilesJsonConfiguration(jsonSettingsLocations);
 
             configBuilder
                 .AddJsonFile("appsettings.json", optional: true)

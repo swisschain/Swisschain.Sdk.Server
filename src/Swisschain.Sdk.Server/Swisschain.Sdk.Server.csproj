@@ -29,6 +29,7 @@
     <PackageReference Include="Swisschain.Extensions.Grpc.Abstractions" Version="2.0.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.8.0" />
     <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.34.0" />
+    <PackageReference Include="StackExchange.Utils.Configuration" Version="0.1.5" />
   </ItemGroup>
 
 </Project>

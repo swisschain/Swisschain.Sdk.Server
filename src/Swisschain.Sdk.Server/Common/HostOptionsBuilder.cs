@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using Swisschain.Sdk.Server.Configuration.FileJsonSettings;
 using Swisschain.Sdk.Server.Configuration.WebJsonSettings;
 
 namespace Swisschain.Sdk.Server.Common
@@ -21,6 +22,8 @@ namespace Swisschain.Sdk.Server.Common
         internal int GrpcPort { get; set; }
 
         internal WebJsonConfigurationSourcesBuilder WebJsonConfigurationSourcesBuilder { get; }
+        
+        internal FileJsonSettingsLocations FileJsonSettingsLocations { get; private set; }
 
         public HostOptionsBuilder UseLoggerFactory(ILoggerFactory loggerFactory)
         {
@@ -62,6 +65,12 @@ namespace Swisschain.Sdk.Server.Common
                 AddWebJsonConfigurationSource(url, areOptional, timeout);
             }
 
+            return this;
+        }
+
+        public HostOptionsBuilder AddFileJsonSettingsLocations(FileJsonSettingsLocations locations)
+        {
+            FileJsonSettingsLocations = locations;
             return this;
         }
     }
