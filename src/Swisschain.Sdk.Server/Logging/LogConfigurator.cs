@@ -7,6 +7,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
 using Swisschain.Sdk.Server.Common;
+using Swisschain.Sdk.Server.Configuration.FileJsonSettings;
 using Swisschain.Sdk.Server.Configuration.WebJsonSettings;
 
 namespace Swisschain.Sdk.Server.Logging
@@ -67,6 +68,8 @@ namespace Swisschain.Sdk.Server.Logging
                         isOptional: !isRemoteSettingsRequired);
                 }
             }
+            
+            configBuilder.AddFilesJsonConfiguration();
 
             configBuilder
                 .AddJsonFile("appsettings.json", optional: true)

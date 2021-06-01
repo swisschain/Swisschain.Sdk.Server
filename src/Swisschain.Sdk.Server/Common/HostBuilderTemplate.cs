@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Swisschain.Sdk.Server.Configuration.FileJsonSettings;
 using Swisschain.Sdk.Server.Configuration.WebJsonSettings;
 
 namespace Swisschain.Sdk.Server.Common
@@ -76,6 +77,8 @@ namespace Swisschain.Sdk.Server.Common
                             remoteSource.Url,
                             remoteSource.IsOptional);
                     }
+                    
+                    config.AddFilesJsonConfiguration();
 
                     // TODO: AddAzureBlobConfiguration()
                     // TODO: AddSecretsManagerConfiguration
