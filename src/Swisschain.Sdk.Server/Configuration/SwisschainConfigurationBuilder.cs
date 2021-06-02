@@ -3,21 +3,19 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using StackExchange.Utils;
+using Swisschain.Sdk.Server.Common;
+using Swisschain.Sdk.Server.Configuration.WebJsonSettings;
 
-namespace Swisschain.Sdk.Server.Configuration.FileJsonSettings
+namespace Swisschain.Sdk.Server.Configuration
 {
-    public static class ConfigurationBuilderExtensions
+    internal static class SwisschainConfigurationBuilder
     {
-        public static void AddFilesJsonConfiguration(this IConfigurationBuilder cfg, FileJsonSettingsLocations locations)
+        public static IConfigurationBuilder AddSwisschainConfiguration(this IConfigurationBuilder configBuilder, WebJsonConfigurationSourcesBuilder webJsonConfigurationBuilder,
+            FileJsonSettingsLocations locations)
         {
             locations ??= FileJsonSettingsLocations.BindDefault();
-
-            if (!locations.Provided)
-            {
-                return;
-            }
             
-            cfg.WithPrefix(
+            configBuilder.WithPrefix(
                     "secrets",
                     c =>
                     {
@@ -34,14 +32,29 @@ namespace Swisschain.Sdk.Server.Configuration.FileJsonSettings
                         {
                             c.AddJsonFile(path, optional: false, reloadOnChange: true);
                         }
+                        
+                        foreach (var source in webJsonConfigurationBuilder.Sources)
+                        {
+                            c.AddWebJsonConfiguration(WebJsonHttpClientProvider.DefaultClient, source.Url,
+                                isOptional: source.IsOptional);
+                        }
+
+                        c.AddJsonFile("appsettings.json", optional: true)
+                            .AddJsonFile($"appsettings.{ApplicationEnvironment.Environment}.json", optional: true)
+                            .AddEnvironmentVariables();
                     }
                 );
-                    
+            
+            return configBuilder;
+        }
+
+        public static IConfigurationRoot ValidateSubstitutions(this IConfigurationRoot configurationRoot)
+        {
             // matches a key wrapped in braces and prefixed with a '$' 
             // e.g. ${secrets:Key} or ${secrets:Section:Key} or ${secrets:Section:NestedSection:Key}
             var substitutionPattern = new Regex(@"\$\{secrets:(?<key>[^\s]+?)\}", RegexOptions.Compiled);
 
-            foreach (var kv in cfg.Build().AsEnumerable())
+            foreach (var kv in configurationRoot.AsEnumerable())
             {
                 if (kv.Value != null && substitutionPattern.Matches(kv.Value).Any())
                 {
@@ -49,6 +62,8 @@ namespace Swisschain.Sdk.Server.Configuration.FileJsonSettings
                         $"Configuration mismatch: secret value {{secrets:{kv.Value}}} not substituted for {kv.Key}");
                 }
             }
+
+            return configurationRoot;
         }
     }
 }

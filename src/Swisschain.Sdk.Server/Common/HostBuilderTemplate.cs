@@ -7,9 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Serilog;
-using Swisschain.Sdk.Server.Configuration.FileJsonSettings;
-using Swisschain.Sdk.Server.Configuration.WebJsonSettings;
+using Swisschain.Sdk.Server.Configuration;
 
 namespace Swisschain.Sdk.Server.Common
 {
@@ -71,24 +69,12 @@ namespace Swisschain.Sdk.Server.Common
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
                     config.Sources.Clear();
-
-                    foreach (var remoteSource in optionsBuilder.WebJsonConfigurationSourcesBuilder.Sources)
-                    {
-                        config.AddWebJsonConfiguration(WebJsonHttpClientProvider.DefaultClient, 
-                            remoteSource.Url,
-                            remoteSource.IsOptional);
-                    }
-                    
-                    config.AddFilesJsonConfiguration(optionsBuilder.FileJsonSettingsLocations);
-
-                    // TODO: AddAzureBlobConfiguration()
-                    // TODO: AddSecretsManagerConfiguration
-
-                    config.AddJsonFile("appsettings.json", optional: true);
-                    config.AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: true);
-                    config.AddEnvironmentVariables();
+                    config.AddSwisschainConfiguration(optionsBuilder.WebJsonConfigurationSourcesBuilder,
+                        optionsBuilder.FileJsonSettingsLocations);
 
                     optionsConfigurationBuilder(hostingContext, config);
+
+                    config.Build().ValidateSubstitutions();
                 })
                 .ConfigureServices(services =>
                 {

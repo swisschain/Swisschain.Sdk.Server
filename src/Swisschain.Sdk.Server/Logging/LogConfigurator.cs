@@ -7,7 +7,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
 using Swisschain.Sdk.Server.Common;
-using Swisschain.Sdk.Server.Configuration.FileJsonSettings;
+using Swisschain.Sdk.Server.Configuration;
 using Swisschain.Sdk.Server.Configuration.WebJsonSettings;
 
 namespace Swisschain.Sdk.Server.Logging
@@ -20,7 +20,27 @@ namespace Swisschain.Sdk.Server.Logging
             Console.WriteLine($"App - name: {ApplicationInformation.AppName}");
             Console.WriteLine($"App - version: {ApplicationInformation.AppVersion}");
 
-            IConfigurationRoot configRoot = BuildConfigRoot(remoteSettingsUrls, jsonSettingsLocations);
+            var isRemoteSettingsRequired = ApplicationEnvironment.Config.GetValue("RemoteSettingsRequired", false);
+            Console.WriteLine($"Env - RemoteSettingsRequired: {isRemoteSettingsRequired}");
+
+            var timeout = ApplicationEnvironment.Config.GetValue("RemoteSettingsReadTimeout", TimeSpan.FromSeconds(5));
+            
+            var webJsonConfigurationBuilder = new WebJsonConfigurationSourcesBuilder();
+
+            foreach (var url in remoteSettingsUrls ?? Enumerable.Empty<string>())
+            {
+                webJsonConfigurationBuilder.Add(new WebJsonConfigurationSourcesBuilder.Source
+                {
+                    IsOptional = !isRemoteSettingsRequired,
+                    Url = url,
+                    Timeout = timeout
+                });
+            }
+
+            var configRoot =  new ConfigurationBuilder()
+                .AddSwisschainConfiguration(webJsonConfigurationBuilder, jsonSettingsLocations)
+                .Build()
+                .ValidateSubstitutions();
 
             var config = new LoggerConfiguration()
                 .ReadFrom.Configuration(configRoot)
@@ -50,34 +70,6 @@ namespace Swisschain.Sdk.Server.Logging
             };
 
             return new LoggerFactory().AddSerilog();
-        }
-
-        private static IConfigurationRoot BuildConfigRoot(IReadOnlyCollection<string> remoteSettingsUrls, FileJsonSettingsLocations jsonSettingsLocations)
-        {
-            var configBuilder = new ConfigurationBuilder();
-
-            var isRemoteSettingsRequired = ApplicationEnvironment.Config.GetValue("RemoteSettingsRequired", false);
-
-            Console.WriteLine($"Env - RemoteSettingsRequired: {isRemoteSettingsRequired}");
-
-            if (remoteSettingsUrls != null)
-            {
-                foreach (var remoteSettingsUrl in remoteSettingsUrls)
-                {
-                    configBuilder.AddWebJsonConfiguration(WebJsonHttpClientProvider.DefaultClient, remoteSettingsUrl,
-                        isOptional: !isRemoteSettingsRequired);
-                }
-            }
-            
-            configBuilder.AddFilesJsonConfiguration(jsonSettingsLocations);
-
-            configBuilder
-                .AddJsonFile("appsettings.json", optional: true)
-                .AddJsonFile($"appsettings.{ApplicationEnvironment.Environment}.json", optional: true)
-                .AddEnvironmentVariables();
-
-            var configRoot = configBuilder.Build();
-            return configRoot;
         }
 
         private static void SetupProperty(string productName, LoggerConfiguration config,

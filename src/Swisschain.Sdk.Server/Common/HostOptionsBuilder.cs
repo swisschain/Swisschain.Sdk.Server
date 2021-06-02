@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
-using Swisschain.Sdk.Server.Configuration.FileJsonSettings;
+using Swisschain.Sdk.Server.Configuration;
 using Swisschain.Sdk.Server.Configuration.WebJsonSettings;
 
 namespace Swisschain.Sdk.Server.Common

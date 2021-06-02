@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Microsoft.Extensions.Configuration;
 
-namespace Swisschain.Sdk.Server.Configuration.FileJsonSettings
+namespace Swisschain.Sdk.Server.Configuration
 {
     public class FileJsonSettingsLocations
     {
@@ -26,7 +26,5 @@ namespace Swisschain.Sdk.Server.Configuration.FileJsonSettings
         
         public string[] SecretsFilePath { get; set; }
         public string[] SettingsFilePath { get; set; }
-
-        public bool Provided => SecretsFilePath.Any() || SecretsFilePath.Any();
     }
 }
