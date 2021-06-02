@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Text;
 using Grpc.AspNetCore.Server;
 using Microsoft.AspNetCore.Authentication;
@@ -9,19 +11,27 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using Serilog;
+using Serilog.Events;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Swisschain.Sdk.Server.Authorization;
+using Swisschain.Sdk.Server.Logging;
 using Swisschain.Sdk.Server.Swagger;
 using Swisschain.Sdk.Server.WebApi.ExceptionsHandling;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Swisschain.Sdk.Server.Common
 {
@@ -121,6 +131,56 @@ namespace Swisschain.Sdk.Server.Common
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseSerilogRequestLogging(options =>
+            {
+                options.GetLevel = (httpContext, elapsed, ex) =>
+                {
+                    if (httpContext.Response.StatusCode >= 500)
+                    {
+                        return LogEventLevel.Error;
+                    }
+
+                    if (httpContext.Response.StatusCode >= 400 || httpContext.Response.StatusCode < 200)
+                    {
+                        return LogEventLevel.Warning;
+                    }
+
+                    return LogEventLevel.Debug;
+                };
+                
+                options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+                {
+                    diagnosticContext.Set("RemoteIpAddress", httpContext.Connection.RemoteIpAddress);
+                    diagnosticContext.Set("DisplayUrl", httpContext.Request.GetDisplayUrl());
+                    
+                    var logger = httpContext.RequestServices.GetRequiredService<ILogger<JwtSecurityToken>>();
+                    var token = httpContext.ReadJwtSecurityToken(logger);
+
+                    void EnrichWithClaim(string type)
+                    {
+                        var cl = token?.Claims?.FirstOrDefault(x => x.Type == type);
+                        if (cl != null)
+                        {
+                            diagnosticContext.Set($"Claim-{type}", cl.Value);
+                        }
+                    }
+                    
+                    EnrichWithClaim(SwisschainClaims.TenantId);
+                    EnrichWithClaim(SwisschainClaims.UserId);
+                    EnrichWithClaim(SwisschainClaims.ApiKeyId);
+                    EnrichWithClaim(SwisschainClaims.UniqueName);
+                    
+                    var errorResponse = httpContext.GetErrorResponse();
+                    if (errorResponse != null)
+                    {
+                        diagnosticContext.Set("ErrorResponse", JsonConvert.SerializeObject(errorResponse));
+                    }
+                    
+                    EnrichDiagnosticContext(diagnosticContext, httpContext, token);
+                };
+
+            });
+
             foreach (var (type, args) in ExceptionHandlingMiddlewares)
             {
                 app.UseMiddleware(type, args);
@@ -185,6 +245,11 @@ namespace Swisschain.Sdk.Server.Common
 
         protected virtual void ConfigureControllers(MvcOptions options)
         {
+        }
+
+        protected virtual void EnrichDiagnosticContext(IDiagnosticContext diagnosticContext, HttpContext httpContext, JwtSecurityToken token)
+        {
+            
         }
 
         protected virtual void ConfigureJwtBearerOptions(JwtBearerOptions options)

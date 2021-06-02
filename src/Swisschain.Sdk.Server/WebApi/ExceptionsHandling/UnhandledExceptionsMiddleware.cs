@@ -51,6 +51,8 @@ namespace Swisschain.Sdk.Server.WebApi.ExceptionsHandling
                     [""] = new[] {message}
                 }
             };
+            
+            ctx.CaptureErrorResponse(response);
 
             return ctx.Response.WriteAsync(JsonConvert.SerializeObject(response, _jsonOptions.Value.SerializerSettings));
         }

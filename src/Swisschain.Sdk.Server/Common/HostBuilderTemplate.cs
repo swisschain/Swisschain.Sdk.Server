@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using Swisschain.Sdk.Server.Configuration.WebJsonSettings;
 
 namespace Swisschain.Sdk.Server.Common
@@ -93,7 +94,7 @@ namespace Swisschain.Sdk.Server.Common
                         services.AddSingleton(optionsBuilder.LoggerFactory);
                         services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
                     }
-                });
+                }).UseSerilog();
         }
     }
 }

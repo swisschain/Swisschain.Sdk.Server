@@ -11,4 +11,11 @@
     <ProjectReference Include="..\src\Swisschain.Sdk.Server\Swisschain.Sdk.Server.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="appsettings.json" />
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
