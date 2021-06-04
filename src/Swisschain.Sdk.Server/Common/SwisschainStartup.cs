@@ -19,6 +19,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
@@ -153,7 +154,7 @@ namespace Swisschain.Sdk.Server.Common
                     diagnosticContext.Set("RemoteIpAddress", httpContext.Connection.RemoteIpAddress);
                     diagnosticContext.Set("DisplayUrl", httpContext.Request.GetDisplayUrl());
                     
-                    var logger = httpContext.RequestServices.GetRequiredService<ILogger<JwtSecurityToken>>();
+                    var logger = httpContext.RequestServices.GetRequiredService<ILogger<SwisschainStartup<TAppSettings>>>();
                     var token = httpContext.ReadJwtSecurityToken(logger);
 
                     void EnrichWithClaim(string type)
@@ -163,12 +164,22 @@ namespace Swisschain.Sdk.Server.Common
                         {
                             diagnosticContext.Set($"Claim-{type}", cl.Value);
                         }
+                    }                    
+                    
+                    void EnrichWithHeader(string headerKey)
+                    {
+                        if (httpContext.Request.Headers.TryGetValue(headerKey, out var headerValue))
+                        {
+                            diagnosticContext.Set($"header-{headerKey}", headerValue);
+                        }
                     }
                     
                     EnrichWithClaim(SwisschainClaims.TenantId);
                     EnrichWithClaim(SwisschainClaims.UserId);
                     EnrichWithClaim(SwisschainClaims.ApiKeyId);
                     EnrichWithClaim(SwisschainClaims.UniqueName);
+                    EnrichWithHeader("X-Request-ID");
+                    EnrichWithHeader("Idempotency-Key");
                     
                     var errorResponse = httpContext.GetErrorResponse();
                     if (errorResponse != null)

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Swisschain.Sdk.Server.Authorization
 {
-    public static class JwtJwtSecurityTokenExtensions
+    public static class JwtSecurityTokenExtensions
     {
         private static readonly JwtSecurityTokenHandler JwtSecurityTokenHandler = new JwtSecurityTokenHandler();
         public static JwtSecurityToken ReadJwtSecurityToken(this HttpContext context, ILogger logger)
