@@ -94,7 +94,7 @@ namespace Swisschain.Sdk.Server.Common
                         services.AddSingleton(optionsBuilder.LoggerFactory);
                         services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
                     }
-                }).UseSerilog();
+                });
         }
     }
 }

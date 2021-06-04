@@ -27,6 +27,7 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Serilog;
 using Serilog.Events;
+using Serilog.Extensions.Hosting;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swisschain.Sdk.Server.Authorization;
 using Swisschain.Sdk.Server.Logging;
@@ -110,6 +111,16 @@ namespace Swisschain.Sdk.Server.Common
             services.AddGrpc(ConfigureGrpcServiceOptions);
 
             services.AddCors(ConfigureCorsOptions);
+            
+            //directly add Diagnostic Context for UseSerilogRequestLogging
+            //from https://github.com/serilog/serilog-aspnetcore/blob/dev/src/Serilog.AspNetCore/SerilogWebHostBuilderExtensions.cs#L156
+            //because we are configuring logging in LogConfigurator
+            
+            var diagnosticContext = new DiagnosticContext(Log.Logger);
+            // Consumed by e.g. middleware
+            services.AddSingleton(diagnosticContext);
+            // Consumed by user code
+            services.AddSingleton<IDiagnosticContext>(diagnosticContext);
 
             services.AddSingleton(Config);
 
@@ -170,7 +181,7 @@ namespace Swisschain.Sdk.Server.Common
                     {
                         if (httpContext.Request.Headers.TryGetValue(headerKey, out var headerValue))
                         {
-                            diagnosticContext.Set($"header-{headerKey}", headerValue);
+                            diagnosticContext.Set($"Header-{headerKey}", headerValue);
                         }
                     }
                     
