@@ -26,5 +26,6 @@ namespace Swisschain.Sdk.Server.Configuration
         
         public string[] SecretsFilePath { get; set; }
         public string[] SettingsFilePath { get; set; }
+        public bool ShouldLogSettings { get; set; }
     }
 }

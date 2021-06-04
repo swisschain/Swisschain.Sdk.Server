@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 using StackExchange.Utils;
 using Swisschain.Sdk.Server.Common;
 using Swisschain.Sdk.Server.Configuration.WebJsonSettings;
@@ -42,6 +44,11 @@ namespace Swisschain.Sdk.Server.Configuration
                         c.AddJsonFile("appsettings.json", optional: true)
                             .AddJsonFile($"appsettings.{ApplicationEnvironment.Environment}.json", optional: true)
                             .AddEnvironmentVariables();
+
+                         if (locations.ShouldLogSettings)
+                        {
+                            Log.Logger.Information("Settings provided : {@Settings}", c.Build().GetDebugView());
+                        }
                     }
                 );
             
@@ -59,7 +66,7 @@ namespace Swisschain.Sdk.Server.Configuration
                 if (kv.Value != null && substitutionPattern.Matches(kv.Value).Any())
                 {
                     throw new InvalidOperationException(
-                        $"Configuration mismatch: secret value {{secrets:{kv.Value}}} not substituted for {kv.Key}");
+                        $"Configuration mismatch: secret value {{{kv.Value}}} not substituted for {kv.Key}");
                 }
             }
 
