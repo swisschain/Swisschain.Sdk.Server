@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option csharp_namespace = "Swisschain.Sirius.Api.ApiContract.Monitoring";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+package common;
+
+service MonitoringService {
+  rpc IsAlive (IsAliveRequest) returns (IsAliveResponse);
+}
+
+message IsAliveRequest {
+}
+
+message IsAliveResponse {
+  string name = 1;
+  string version = 2;
+  google.protobuf.Timestamp started_at = 3;
+  string env = 4;
+  string host_name = 5;
+}

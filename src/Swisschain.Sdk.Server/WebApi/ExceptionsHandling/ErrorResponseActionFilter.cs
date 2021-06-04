@@ -17,7 +17,10 @@ namespace Swisschain.Sdk.Server.WebApi.ExceptionsHandling
                 if (statusCodeResult.StatusCode != null &&
                     (statusCodeResult.StatusCode < 200 || statusCodeResult.StatusCode >= 300))
                 {
-                    context.Result = CreateValidationResult(context.ModelState, statusCodeResult.StatusCode.Value);
+                    var errorResult = CreateValidationResult(context.ModelState, statusCodeResult.StatusCode.Value);
+                    
+                    context.Result = errorResult.actionResult;
+                    context.HttpContext.CaptureErrorResponse(errorResult.resultObject);
                 }
             }
         }
@@ -26,11 +29,14 @@ namespace Swisschain.Sdk.Server.WebApi.ExceptionsHandling
         {
             if (!context.ModelState.IsValid)
             {
-                context.Result = CreateValidationResult(context.ModelState, StatusCodes.Status400BadRequest);
+                var errorResult = CreateValidationResult(context.ModelState, StatusCodes.Status400BadRequest);
+                
+                context.Result = errorResult.actionResult;
+                context.HttpContext.CaptureErrorResponse(errorResult.resultObject);
             }
         }
 
-        private static IActionResult CreateValidationResult(ModelStateDictionary modelState, int statusCode)
+        private static (IActionResult actionResult, object resultObject) CreateValidationResult(ModelStateDictionary modelState, int statusCode)
         {
             var messages = modelState
                 .Select(x => new
@@ -53,7 +59,7 @@ namespace Swisschain.Sdk.Server.WebApi.ExceptionsHandling
                     : new Dictionary<string, string[]> {{"", new[] {"Unknown error"}}}
             };
 
-            return new ObjectResult(resultObject) {StatusCode = statusCode};
+            return (new ObjectResult(resultObject) {StatusCode = statusCode}, resultObject);
         }
 
         private static string FormatFieldName(string fieldName)
