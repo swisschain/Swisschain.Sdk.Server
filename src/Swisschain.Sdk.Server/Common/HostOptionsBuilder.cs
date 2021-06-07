@@ -23,7 +23,7 @@ namespace Swisschain.Sdk.Server.Common
 
         internal WebJsonConfigurationSourcesBuilder WebJsonConfigurationSourcesBuilder { get; }
         
-        internal FileJsonSettingsLocations FileJsonSettingsLocations { get; private set; }
+        internal FileJsonConfigurationLocation FileJsonConfigurationLocation { get; private set; }
 
         public HostOptionsBuilder UseLoggerFactory(ILoggerFactory loggerFactory)
         {
@@ -68,9 +68,9 @@ namespace Swisschain.Sdk.Server.Common
             return this;
         }
 
-        public HostOptionsBuilder AddFileJsonSettingsLocations(FileJsonSettingsLocations locations)
+        public HostOptionsBuilder AddFileJsonConfigurationLocation(FileJsonConfigurationLocation locations)
         {
-            FileJsonSettingsLocations = locations;
+            FileJsonConfigurationLocation = locations;
             return this;
         }
     }

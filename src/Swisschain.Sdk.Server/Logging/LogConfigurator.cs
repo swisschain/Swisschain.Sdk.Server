@@ -15,7 +15,7 @@ namespace Swisschain.Sdk.Server.Logging
     public static class LogConfigurator
     {
         public static ILoggerFactory Configure(string productName = default,
-            IReadOnlyCollection<string> remoteSettingsUrls = default, Func<IConfigurationRoot, IReadOnlyDictionary<string, string>> additionalPropertiesFactory = default, FileJsonSettingsLocations jsonSettingsLocations = default)
+            IReadOnlyCollection<string> remoteSettingsUrls = default, Func<IConfigurationRoot, IReadOnlyDictionary<string, string>> additionalPropertiesFactory = default, FileJsonConfigurationLocation jsonConfigurationLocation = default)
         {
             Console.WriteLine($"App - name: {ApplicationInformation.AppName}");
             Console.WriteLine($"App - version: {ApplicationInformation.AppVersion}");
@@ -38,7 +38,7 @@ namespace Swisschain.Sdk.Server.Logging
             }
 
             var configRoot =  new ConfigurationBuilder()
-                .AddSwisschainConfiguration(webJsonConfigurationBuilder, jsonSettingsLocations)
+                .AddSwisschainConfiguration(webJsonConfigurationBuilder, jsonConfigurationLocation)
                 .Build()
                 .ValidateSubstitutions();
 

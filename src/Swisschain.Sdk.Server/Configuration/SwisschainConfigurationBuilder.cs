@@ -13,15 +13,15 @@ namespace Swisschain.Sdk.Server.Configuration
     internal static class SwisschainConfigurationBuilder
     {
         public static IConfigurationBuilder AddSwisschainConfiguration(this IConfigurationBuilder configBuilder, WebJsonConfigurationSourcesBuilder webJsonConfigurationBuilder,
-            FileJsonSettingsLocations locations)
+            FileJsonConfigurationLocation locations)
         {
-            locations ??= FileJsonSettingsLocations.BindDefault();
+            locations ??= FileJsonConfigurationLocation.BindDefault();
             
             configBuilder.WithPrefix(
                     "secrets",
                     c =>
                     {
-                        foreach (var path in locations.SecretsFilePath)
+                        foreach (var path in locations.SecretFilePaths)
                         {
                             c.AddJsonFile(path, optional: false, reloadOnChange: true);
                         }
@@ -30,7 +30,7 @@ namespace Swisschain.Sdk.Server.Configuration
                 .WithSubstitution(
                     c =>
                     {
-                        foreach (var path in locations.SettingsFilePath)
+                        foreach (var path in locations.SettingFilePaths)
                         {
                             c.AddJsonFile(path, optional: false, reloadOnChange: true);
                         }

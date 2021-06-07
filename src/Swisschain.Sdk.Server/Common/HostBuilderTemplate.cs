@@ -70,7 +70,7 @@ namespace Swisschain.Sdk.Server.Common
                 {
                     config.Sources.Clear();
                     config.AddSwisschainConfiguration(optionsBuilder.WebJsonConfigurationSourcesBuilder,
-                        optionsBuilder.FileJsonSettingsLocations);
+                        optionsBuilder.FileJsonConfigurationLocation);
 
                     optionsConfigurationBuilder(hostingContext, config);
 
