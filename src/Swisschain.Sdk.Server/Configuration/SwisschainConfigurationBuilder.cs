@@ -61,13 +61,19 @@ namespace Swisschain.Sdk.Server.Configuration
             // e.g. ${secrets:Key} or ${secrets:Section:Key} or ${secrets:Section:NestedSection:Key}
             var substitutionPattern = new Regex(@"\$\{secrets:(?<key>[^\s]+?)\}", RegexOptions.Compiled);
 
+            var errors = new Dictionary<string, string>();
             foreach (var kv in configurationRoot.AsEnumerable())
             {
                 if (kv.Value != null && substitutionPattern.Matches(kv.Value).Any())
                 {
-                    throw new InvalidOperationException(
-                        $"Configuration mismatch: secret value {{{kv.Value}}} not substituted for {kv.Key}");
+                    errors.Add(kv.Key, kv.Value);
                 }
+            }
+
+            if (errors.Any())
+            {
+                var errorsDesc = string.Join(", ", errors.Select(p => $"{p.Key} : [{p.Value}]"));
+                throw new InvalidOperationException($"Configuration mismatch: substitutions not found for {errorsDesc}");
             }
 
             return configurationRoot;
