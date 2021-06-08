@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 
 namespace Swisschain.Sdk.Server.Configuration
@@ -7,8 +8,8 @@ namespace Swisschain.Sdk.Server.Configuration
     {
         public FileJsonConfigurationLocation()
         {
-            SecretFilePaths = Array.Empty<string>();
-            SettingFilePaths = Array.Empty<string>();
+            SecretFilePaths = new List<string>();
+            SettingFilePaths = new List<string>();
         }
         
         public static FileJsonConfigurationLocation BindDefault()
@@ -24,8 +25,8 @@ namespace Swisschain.Sdk.Server.Configuration
             return result;
         }
         
-        public string[] SecretFilePaths { get; set; }
-        public string[] SettingFilePaths { get; set; }
+        public IList<string> SecretFilePaths { get; set; }
+        public IList<string> SettingFilePaths { get; set; }
         public bool ShouldLogSettings { get; set; }
     }
 }

@@ -15,8 +15,13 @@ namespace Swisschain.Sdk.Server.Configuration
         public static IConfigurationBuilder AddSwisschainConfiguration(this IConfigurationBuilder configBuilder, WebJsonConfigurationSourcesBuilder webJsonConfigurationBuilder,
             FileJsonConfigurationLocation locations)
         {
-            locations ??= FileJsonConfigurationLocation.BindDefault();
+            if (locations != null)
+            {
+                Validate(locations);
+            }
             
+            locations ??= FileJsonConfigurationLocation.BindDefault();
+          
             configBuilder.WithPrefix(
                     "secrets",
                     c =>
@@ -77,6 +82,29 @@ namespace Swisschain.Sdk.Server.Configuration
             }
 
             return configurationRoot;
+        }
+
+        private static void Validate(FileJsonConfigurationLocation locations)
+        {
+            if (locations.SettingFilePaths == null)
+            {
+                throw new ArgumentNullException(nameof(locations.SettingFilePaths));
+            }
+
+            if (locations.SecretFilePaths == null)
+            {
+                throw new ArgumentNullException(nameof(locations.SecretFilePaths));
+            }
+
+            if (!locations.SecretFilePaths.Any())
+            {
+                throw new ArgumentException("Provided sequence is empty", nameof(locations.SecretFilePaths));
+            }
+
+            if (!locations.SettingFilePaths.Any())
+            {
+                throw new ArgumentException("Provided sequence is empty", nameof(locations.SettingFilePaths));
+            }
         }
     }
 }
