@@ -145,6 +145,7 @@ namespace Swisschain.Sdk.Server.Common
 
             app.UseSerilogRequestLogging(options =>
             {
+                var ignoredPaths = new[] { "/metrics", "/api/isalive" }.ToHashSet();
                 options.GetLevel = (httpContext, elapsed, ex) =>
                 {
                     if (httpContext.Response.StatusCode >= 500)
@@ -156,7 +157,12 @@ namespace Swisschain.Sdk.Server.Common
                     {
                         return LogEventLevel.Warning;
                     }
-
+                    
+                    if (ignoredPaths.Contains(httpContext.Request.Path))
+                    {
+                        return LogEventLevel.Verbose;
+                    }
+                    
                     return LogEventLevel.Debug;
                 };
                 
